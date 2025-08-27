@@ -50,9 +50,21 @@ public sealed class ChatsController(
         await context.AddAsync(chat, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
-        string connectionId = ChatHub.Users.First(p => p.Value == chat.ToUserId).Key;
+        // SignalR bağlantısı varsa gönder, yoksa devam et
+        try
+        {
+            var connectionId = ChatHub.Users.FirstOrDefault(p => p.Value == chat.ToUserId).Key;
 
-        await hubContext.Clients.Client(connectionId).SendAsync("Messages", chat);
+            if (!string.IsNullOrEmpty(connectionId))
+            {
+                await hubContext.Clients.Client(connectionId).SendAsync("Messages", chat);
+            }
+        }
+        catch (Exception ex)
+        {
+            // SignalR hatası loglayabilirsin ama API response'u etkilemesin
+            Console.WriteLine($"SignalR Error: {ex.Message}");
+        }
 
         return Ok(chat);
     }
