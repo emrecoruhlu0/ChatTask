@@ -1,0 +1,9 @@
+C:\Users\emrec\source\repos\ChatTask\ChatTask.UserService\obj\Debug\net9.0\ChatTask.UserService.csproj.AssemblyReference.cache
+C:\Users\emrec\source\repos\ChatTask\ChatTask.UserService\obj\Debug\net9.0\rpswa.dswa.cache.json
+C:\Users\emrec\source\repos\ChatTask\ChatTask.UserService\obj\Debug\net9.0\ChatTask.UserService.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\emrec\source\repos\ChatTask\ChatTask.UserService\obj\Debug\net9.0\ChatTask.UserService.AssemblyInfoInputs.cache
+C:\Users\emrec\source\repos\ChatTask\ChatTask.UserService\obj\Debug\net9.0\ChatTask.UserService.AssemblyInfo.cs
+C:\Users\emrec\source\repos\ChatTask\ChatTask.UserService\obj\Debug\net9.0\ChatTask.UserService.csproj.CoreCompileInputs.cache
+C:\Users\emrec\source\repos\ChatTask\ChatTask.UserService\obj\Debug\net9.0\ChatTask.UserService.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\emrec\source\repos\ChatTask\ChatTask.UserService\obj\Debug\net9.0\ChatTask.UserService.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\emrec\source\repos\ChatTask\ChatTask.UserService\obj\Debug\net9.0\ChatTask.UserService.sourcelink.json
