@@ -1,3 +1,5 @@
+using ChatTask.Shared.DTOs;
+
 public interface IUserService
 {
     Task<bool> UserExistsAsync(Guid userId);

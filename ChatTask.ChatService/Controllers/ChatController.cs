@@ -1,5 +1,13 @@
+using ChatTask.ChatService.Context;
+using ChatTask.ChatService.Hubs;
+using ChatTask.ChatService.Models;
+using ChatTask.ChatService.Services;
+using ChatTask.Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+
+namespace ChatTask.ChatService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -19,60 +27,166 @@ public class ChatsController : ControllerBase
     [HttpGet("users")]
     public async Task<IActionResult> GetUsers()
     {
-        // User Service'ten kullanýcýlarý al
-        var users = await _userService.GetAllUsersAsync();
-        return Ok(users);
-    }
-
-    [HttpGet("{userId}/{toUserId}")]
-    public async Task<IActionResult> GetChats(Guid userId, Guid toUserId)
-    {
-        // Mevcut GetChats kodunuzu buraya taþýyýn
-        var chats = await _context.Chats
-            .Where(p => (p.UserId == userId && p.ToUserId == toUserId) ||
-                       (p.ToUserId == userId && p.UserId == toUserId))
-            .OrderBy(p => p.Date)
-            .ToListAsync();
-
-        return Ok(chats);
-    }
-
-    [HttpPost("send")]
-    public async Task<IActionResult> SendMessage(SendMessageDto request)
-    {
-        // User doðrulama
-        if (!await _userService.UserExistsAsync(request.UserId) ||
-            !await _userService.UserExistsAsync(request.ToUserId))
-        {
-            return BadRequest("Invalid user ID");
-        }
-
-        Chat chat = new()
-        {
-            UserId = request.UserId,
-            ToUserId = request.ToUserId,
-            Message = request.Message,
-            Date = DateTime.Now
-        };
-
-        await _context.AddAsync(chat);
-        await _context.SaveChangesAsync();
-
-        // SignalR ile gönder (mevcut kodunuz)
         try
         {
-            var connectionId = ChatHub.Users.FirstOrDefault(p => p.Value == chat.ToUserId).Key;
-            if (!string.IsNullOrEmpty(connectionId))
-            {
-                await _hubContext.Clients.Client(connectionId).SendAsync("Messages", chat);
-            }
+            // User Service'ten kullanýcýlarý al
+            var users = await _userService.GetAllUsersAsync();
+            return Ok(users);
         }
         catch (Exception ex)
         {
-            // Log error but don't fail the request
-            Console.WriteLine($"SignalR Error: {ex.Message}");
+            return StatusCode(500, new { Message = "Kullanýcýlar alýnýrken hata oluþtu", Error = ex.Message });
         }
+    }
 
-        return Ok(chat);
+    [HttpGet("{userId:guid}/{toUserId:guid}")]
+    public async Task<IActionResult> GetChats(Guid userId, Guid toUserId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            // User'larýn var olduðunu kontrol et
+            if (!await _userService.UserExistsAsync(userId) || !await _userService.UserExistsAsync(toUserId))
+            {
+                return BadRequest(new { Message = "Geçersiz kullanýcý ID'si" });
+            }
+
+            var chats = await _context.Chats
+                .Where(p => (p.UserId == userId && p.ToUserId == toUserId) ||
+                           (p.ToUserId == userId && p.UserId == toUserId))
+                .OrderBy(p => p.Date)
+                .ToListAsync(cancellationToken);
+
+            // ChatDto listesi olarak döndür
+            var chatDtos = chats.Select(c => new ChatDto
+            {
+                Id = c.Id,
+                UserId = c.UserId,
+                ToUserId = c.ToUserId,
+                Message = c.Message,
+                Date = c.Date
+            }).ToList();
+
+            return Ok(chatDtos);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = "Mesajlar alýnýrken hata oluþtu", Error = ex.Message });
+        }
+    }
+
+    [HttpPost("send")]
+    public async Task<IActionResult> SendMessage([FromBody] SendMessageDto request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            // User doðrulama
+            if (!await _userService.UserExistsAsync(request.UserId) ||
+                !await _userService.UserExistsAsync(request.ToUserId))
+            {
+                return BadRequest(new { Message = "Geçersiz kullanýcý ID'si" });
+            }
+
+            // Chat oluþtur
+            Chat chat = new()
+            {
+                UserId = request.UserId,
+                ToUserId = request.ToUserId,
+                Message = request.Message,
+                Date = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _context.AddAsync(chat, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            // SignalR ile real-time gönderim
+            try
+            {
+                var connectionId = ChatHub.Users.FirstOrDefault(p => p.Value == chat.ToUserId).Key;
+
+                if (!string.IsNullOrEmpty(connectionId))
+                {
+                    var chatDto = new ChatDto
+                    {
+                        Id = chat.Id,
+                        UserId = chat.UserId,
+                        ToUserId = chat.ToUserId,
+                        Message = chat.Message,
+                        Date = chat.Date
+                    };
+
+                    await _hubContext.Clients.Client(connectionId).SendAsync("Messages", chatDto, cancellationToken);
+                }
+            }
+            catch (Exception signalREx)
+            {
+                // SignalR hatasý loglayabilirsin ama API response'u etkilemesin
+                Console.WriteLine($"SignalR Error: {signalREx.Message}");
+            }
+
+            // ChatDto olarak döndür
+            var resultDto = new ChatDto
+            {
+                Id = chat.Id,
+                UserId = chat.UserId,
+                ToUserId = chat.ToUserId,
+                Message = chat.Message,
+                Date = chat.Date
+            };
+
+            return Ok(resultDto);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = "Mesaj gönderilirken hata oluþtu", Error = ex.Message });
+        }
+    }
+
+    [HttpGet("conversations/{userId:guid}")]
+    public async Task<IActionResult> GetConversations(Guid userId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Kullanýcýnýn tüm konuþmalarýný al (son mesajlarla birlikte)
+            var conversations = await _context.Chats
+                .Where(c => c.UserId == userId || c.ToUserId == userId)
+                .GroupBy(c => c.UserId == userId ? c.ToUserId : c.UserId)
+                .Select(g => new
+                {
+                    UserId = g.Key,
+                    LastMessage = g.OrderByDescending(m => m.Date).First(),
+                    UnreadCount = g.Count(m => m.ToUserId == userId && !m.IsRead)
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(conversations);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = "Konuþmalar alýnýrken hata oluþtu", Error = ex.Message });
+        }
+    }
+
+    [HttpPut("mark-read/{chatId:guid}")]
+    public async Task<IActionResult> MarkAsRead(Guid chatId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var chat = await _context.Chats.FindAsync(chatId);
+
+            if (chat == null)
+            {
+                return NotFound(new { Message = "Mesaj bulunamadý" });
+            }
+
+            chat.IsRead = true;
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Ok(new { Message = "Mesaj okundu olarak iþaretlendi" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = "Mesaj güncellenirken hata oluþtu", Error = ex.Message });
+        }
     }
 }

@@ -170,4 +170,3 @@ C:\Users\emrec\source\repos\ChatTask\ChatTask\obj\Debug\net8.0\refint\ChatTask.d
 C:\Users\emrec\source\repos\ChatTask\ChatTask\obj\Debug\net8.0\ChatTask.pdb
 C:\Users\emrec\source\repos\ChatTask\ChatTask\obj\Debug\net8.0\ChatTask.genruntimeconfig.cache
 C:\Users\emrec\source\repos\ChatTask\ChatTask\obj\Debug\net8.0\ref\ChatTask.dll
-C:\Users\emrec\source\repos\ChatTask\ChatTask\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

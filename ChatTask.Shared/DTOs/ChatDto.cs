@@ -1,4 +1,6 @@
-﻿public class ChatDto
+﻿namespace ChatTask.Shared.DTOs;
+
+public class ChatDto
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }

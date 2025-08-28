@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+namespace ChatTask.Shared.DTOs;
 
 public class RegisterDto
 {

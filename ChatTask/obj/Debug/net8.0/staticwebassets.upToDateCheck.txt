@@ -1,4 +1,0 @@
-wwwroot\avatar\avatar1.png
-wwwroot\avatar\avatar2.png
-wwwroot\avatar\5d973109-57c1-4bf2-9152-ceb647fd9b38.png
-wwwroot\avatar\9b1d6d77-f7b2-4959-ac3f-fc47b230256d.png

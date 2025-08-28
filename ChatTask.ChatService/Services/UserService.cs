@@ -1,3 +1,6 @@
+using ChatTask.Shared.DTOs;
+
+namespace ChatTask.ChatService.Services;
 public class UserService : IUserService
 {
     private readonly HttpClient _httpClient;

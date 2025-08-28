@@ -1,3 +1,6 @@
+using ChatTask.ChatService.Context;
+using ChatTask.ChatService.Hubs;
+using ChatTask.ChatService.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
