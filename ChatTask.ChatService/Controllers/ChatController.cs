@@ -41,6 +41,32 @@ public class ChatsController : ControllerBase
         }
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetAllChats(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var chats = await _context.Chats
+                .OrderByDescending(c => c.Date)
+                .ToListAsync(cancellationToken);
+
+            var chatDtos = chats.Select(c => new ChatDto
+            {
+                Id = c.Id,
+                UserId = c.UserId,
+                ToUserId = c.ToUserId,
+                Message = c.Message,
+                Date = c.Date
+            }).ToList();
+
+            return Ok(chatDtos);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = "Mesajlar alınırken hata oluştu", Error = ex.Message });
+        }
+    }
+
     [HttpGet("{userId:guid}/{toUserId:guid}")]
     public async Task<IActionResult> GetChats(Guid userId, Guid toUserId, CancellationToken cancellationToken)
     {

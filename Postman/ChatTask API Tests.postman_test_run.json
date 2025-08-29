@@ -1,22 +1,22 @@
 {
-	"id": "d7d6674e-6b1f-4b63-92f4-b52a4f07a41c",
+	"id": "a78660dd-ed92-4fa5-864d-cf5b0d970f7f",
 	"name": "ChatTask API Tests",
-	"timestamp": "2025-08-28T22:16:53.238Z",
-	"collection_id": "47034976-98bbe251-e3ac-4847-8dc4-86342a491e13",
+	"timestamp": "2025-08-29T12:00:56.004Z",
+	"collection_id": "47034976-ab2ef063-f120-422d-8078-031a05aab06f",
 	"folder_id": 0,
-	"environment_id": "47034976-74f59492-1601-411b-b79c-8f41a1f27a94",
-	"totalPass": 1,
+	"environment_id": "47034976-b99e6dbe-05ba-4320-be62-0fa1a6c3b92b",
+	"totalPass": 0,
 	"delay": 0,
 	"persist": true,
 	"status": "finished",
-	"startedAt": "2025-08-28T22:16:49.102Z",
-	"totalFail": 6,
+	"startedAt": "2025-08-29T12:00:51.826Z",
+	"totalFail": 7,
 	"results": [
 		{
-			"id": "02cef1c6-07b8-4de6-b40c-8c74fd479fd4",
+			"id": "a7761414-9d3e-4f4c-90e7-ad297ee104f9",
 			"name": "1. Register User 1",
 			"url": "http://localhost:5001/api/Users/register",
-			"time": 2235,
+			"time": 2376,
 			"responseCode": {
 				"code": 400,
 				"name": "Bad Request"
@@ -31,7 +31,7 @@
 				}
 			},
 			"times": [
-				2235
+				2376
 			],
 			"allTests": [
 				{
@@ -40,37 +40,37 @@
 			]
 		},
 		{
-			"id": "e18f2423-b4e5-4481-b192-3b902c0a5693",
+			"id": "8904760a-e8c9-4312-a498-851720d710a0",
 			"name": "2. Register User 2",
 			"url": "http://localhost:5001/api/Users/register",
-			"time": 286,
+			"time": 45,
 			"responseCode": {
-				"code": 200,
-				"name": "OK"
+				"code": 400,
+				"name": "Bad Request"
 			},
 			"tests": {
-				"User 2 registered successfully": true
+				"User 2 registered successfully": false
 			},
 			"testPassFailCounts": {
 				"User 2 registered successfully": {
-					"pass": 1,
-					"fail": 0
+					"pass": 0,
+					"fail": 1
 				}
 			},
 			"times": [
-				286
+				45
 			],
 			"allTests": [
 				{
-					"User 2 registered successfully": true
+					"User 2 registered successfully": false
 				}
 			]
 		},
 		{
-			"id": "4396b560-c8a7-4f25-9986-80aefe61fe68",
+			"id": "039cef5f-f4df-46d0-b88f-5776680010ce",
 			"name": "3. Login",
 			"url": "http://localhost:5003/api/auth/login",
-			"time": 462,
+			"time": 533,
 			"responseCode": {
 				"code": 401,
 				"name": "Unauthorized"
@@ -85,7 +85,7 @@
 				}
 			},
 			"times": [
-				462
+				533
 			],
 			"allTests": [
 				{
@@ -94,10 +94,10 @@
 			]
 		},
 		{
-			"id": "33aee045-088e-426c-8e27-393f6d851ea7",
+			"id": "5f94c8cc-c34e-4033-80fc-faf3d5a0beda",
 			"name": "4. Get Users",
 			"url": "http://localhost:5002/api/Chats/users",
-			"time": 117,
+			"time": 119,
 			"responseCode": {
 				"code": 401,
 				"name": "Unauthorized"
@@ -112,7 +112,7 @@
 				}
 			},
 			"times": [
-				117
+				119
 			],
 			"allTests": [
 				{
@@ -121,7 +121,7 @@
 			]
 		},
 		{
-			"id": "0b4353e5-0d43-4c65-a60e-6b058d87cf5e",
+			"id": "6946a731-76b4-4beb-8a44-5deb1a89591f",
 			"name": "5. Send Message",
 			"url": "http://localhost:5002/api/Chats/send",
 			"time": 11,
@@ -148,7 +148,7 @@
 			]
 		},
 		{
-			"id": "07b24346-96fa-4b17-85de-dccd4276390e",
+			"id": "80035ff9-65c2-4946-9f7e-7bca96b908fd",
 			"name": "6. Send Reply Message",
 			"url": "http://localhost:5002/api/Chats/send",
 			"time": 6,
@@ -175,13 +175,13 @@
 			]
 		},
 		{
-			"id": "1d63ae2d-f65b-4939-97d9-58278e40bf72",
+			"id": "8e43cfbf-d4d0-4d20-9b57-053e74c410eb",
 			"name": "7. Get Chats",
 			"url": "http://localhost:5002/api/Chats",
 			"time": 4,
 			"responseCode": {
-				"code": 404,
-				"name": "Not Found"
+				"code": 401,
+				"name": "Unauthorized"
 			},
 			"tests": {
 				"Get chats successful": false
@@ -203,35 +203,35 @@
 		}
 	],
 	"count": 1,
-	"totalTime": 3121,
+	"totalTime": 3094,
 	"collection": {
 		"requests": [
 			{
-				"id": "02cef1c6-07b8-4de6-b40c-8c74fd479fd4",
+				"id": "a7761414-9d3e-4f4c-90e7-ad297ee104f9",
 				"method": "POST"
 			},
 			{
-				"id": "e18f2423-b4e5-4481-b192-3b902c0a5693",
+				"id": "8904760a-e8c9-4312-a498-851720d710a0",
 				"method": "POST"
 			},
 			{
-				"id": "4396b560-c8a7-4f25-9986-80aefe61fe68",
+				"id": "039cef5f-f4df-46d0-b88f-5776680010ce",
 				"method": "POST"
 			},
 			{
-				"id": "33aee045-088e-426c-8e27-393f6d851ea7",
+				"id": "5f94c8cc-c34e-4033-80fc-faf3d5a0beda",
 				"method": "GET"
 			},
 			{
-				"id": "0b4353e5-0d43-4c65-a60e-6b058d87cf5e",
+				"id": "6946a731-76b4-4beb-8a44-5deb1a89591f",
 				"method": "POST"
 			},
 			{
-				"id": "07b24346-96fa-4b17-85de-dccd4276390e",
+				"id": "80035ff9-65c2-4946-9f7e-7bca96b908fd",
 				"method": "POST"
 			},
 			{
-				"id": "1d63ae2d-f65b-4939-97d9-58278e40bf72",
+				"id": "8e43cfbf-d4d0-4d20-9b57-053e74c410eb",
 				"method": "GET"
 			}
 		]

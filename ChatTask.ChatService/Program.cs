@@ -16,8 +16,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ChatDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// HTTP Client for User Service
-builder.Services.AddHttpClient<IUserService, UserService>();
+// HTTP Client for User Service - DÜZELTME: Base URL'i appsettings'ten al
+builder.Services.AddHttpClient<IUserService, UserService>(client =>
+{
+    var userServiceUrl = builder.Configuration.GetValue<string>("Services:UserService:BaseUrl") ?? "http://localhost:5001";
+    client.BaseAddress = new Uri(userServiceUrl);
+});
 
 // SignalR
 builder.Services.AddSignalR();
@@ -51,11 +55,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
         };
+        
+        // SignalR için token query'den al
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
             {
-                // Allow SignalR access_token query
                 var accessToken = context.Request.Query["access_token"];
                 var path = context.HttpContext.Request.Path;
                 if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chat-hub"))
@@ -81,4 +86,4 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<ChatHub>("/chat-hub");
 
-app.Run();
+app.Run();  
