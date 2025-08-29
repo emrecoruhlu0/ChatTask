@@ -3,6 +3,8 @@ using ChatTask.UserService.Context;
 using ChatTask.UserService.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ChatTask.UserService.Controllers;
 
@@ -18,47 +20,49 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromForm] RegisterDto request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Register([FromBody] RegisterDto request, CancellationToken cancellationToken)
     {
         try
         {
-            // Name kontrolü
+            // Debug logging
+            Console.WriteLine($"Register request received - Name: '{request.Name}', Password: '{request.Password}'");
+            
+            // Validation
+            if (string.IsNullOrEmpty(request.Name))
+            {
+                Console.WriteLine("Name is null or empty");
+                return BadRequest(new { Message = "Name is required" });
+            }
+            
+            if (string.IsNullOrEmpty(request.Password))
+            {
+                Console.WriteLine("Password is null or empty");
+                return BadRequest(new { Message = "Password is required" });
+            }
+
+            // Name kontrolÃ¼
             bool isNameExists = await _context.Users.AnyAsync(p => p.Name == request.Name, cancellationToken);
 
             if (isNameExists)
             {
-                return BadRequest(new { Message = "Bu kullanýcý adý daha önce kullanýlmýþ" });
+                Console.WriteLine($"User name '{request.Name}' already exists");
+                return BadRequest(new { Message = "Bu kullanÄ±cÄ± adÄ± daha Ã¶nce kullanÄ±lmÄ±ÅŸ" });
             }
 
-            // Avatar upload
-            string avatar = "/avatar/default.png"; // Default avatar
+            // Default avatar (PNG yÃ¼kleme zorunlu deÄŸil)
+            string avatar = "/avatar/default.png";
 
-            if (request.File != null)
-            {
-                // wwwroot/avatar klasörünü oluþtur
-                var avatarDir = Path.Combine("wwwroot", "avatar");
-                if (!Directory.Exists(avatarDir))
-                {
-                    Directory.CreateDirectory(avatarDir);
-                }
+            // Parola hashle
+            CreatePasswordHash(request.Password, out string hash, out string salt);
 
-                string avatarFileName = Guid.NewGuid() + Path.GetExtension(request.File.FileName);
-                string avatarPath = Path.Combine(avatarDir, avatarFileName);
-
-                using (var stream = new FileStream(avatarPath, FileMode.Create))
-                {
-                    await request.File.CopyToAsync(stream, cancellationToken);
-                }
-
-                avatar = $"/avatar/{avatarFileName}";
-            }
-
-            // User oluþtur
+            // User oluÅŸtur
             User user = new()
             {
                 Name = request.Name,
                 Avatar = avatar,
                 Status = "offline",
+                PasswordHash = hash,
+                PasswordSalt = salt,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -66,7 +70,9 @@ public class UsersController : ControllerBase
             await _context.AddAsync(user, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // UserDto olarak döndür
+            Console.WriteLine($"User '{request.Name}' registered successfully with ID: {user.Id}");
+
+            // UserDto olarak dÃ¶ndÃ¼r
             var userDto = new UserDto
             {
                 Id = user.Id,
@@ -79,8 +85,58 @@ public class UsersController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Kayýt sýrasýnda hata oluþtu", Error = ex.Message });
+            Console.WriteLine($"Register error: {ex.Message}");
+            return StatusCode(500, new { Message = "KayÄ±t sÄ±rasÄ±nda hata oluÅŸtu", Error = ex.Message });
         }
+    }
+
+    [HttpPost("validate")]
+    public async Task<IActionResult> Validate([FromBody] LoginRequestDto request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Name == request.UserName, cancellationToken);
+            if (user is null)
+            {
+                return Unauthorized(new { Message = "Geersiz kullanc veya parola" });
+            }
+
+            if (!VerifyPassword(request.Password, user.PasswordHash, user.PasswordSalt))
+            {
+                return Unauthorized(new { Message = "Geersiz kullanc veya parola" });
+            }
+
+            return Ok(new UserDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Avatar = user.Avatar,
+                Status = user.Status
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = "Dorulama srasnda hata olutu", Error = ex.Message });
+        }
+    }
+
+    private static void CreatePasswordHash(string password, out string hash, out string salt)
+    {
+        using var rng = RandomNumberGenerator.Create();
+        var saltBytes = new byte[16];
+        rng.GetBytes(saltBytes);
+        salt = Convert.ToBase64String(saltBytes);
+
+        using var pbkdf2 = new Rfc2898DeriveBytes(password, saltBytes, 100000, HashAlgorithmName.SHA256);
+        hash = Convert.ToBase64String(pbkdf2.GetBytes(32));
+    }
+
+    private static bool VerifyPassword(string password, string storedHash, string storedSalt)
+    {
+        var saltBytes = Convert.FromBase64String(storedSalt);
+        using var pbkdf2 = new Rfc2898DeriveBytes(password, saltBytes, 100000, HashAlgorithmName.SHA256);
+        var computedHash = Convert.ToBase64String(pbkdf2.GetBytes(32));
+        return CryptographicOperations.FixedTimeEquals(Convert.FromBase64String(storedHash), Convert.FromBase64String(computedHash));
     }
 
     [HttpGet("login")]
@@ -92,15 +148,15 @@ public class UsersController : ControllerBase
 
             if (user is null)
             {
-                return BadRequest(new { Message = "Kullanýcý bulunamadý" });
+                return BadRequest(new { Message = "Kullanï¿½cï¿½ bulunamadï¿½" });
             }
 
-            // Status güncelle
+            // Status gï¿½ncelle
             user.Status = "online";
             user.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync(cancellationToken);
 
-            // UserDto olarak döndür
+            // UserDto olarak dï¿½ndï¿½r
             var userDto = new UserDto
             {
                 Id = user.Id,
@@ -113,7 +169,7 @@ public class UsersController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Giriþ sýrasýnda hata oluþtu", Error = ex.Message });
+            return StatusCode(500, new { Message = "Giriï¿½ sï¿½rasï¿½nda hata oluï¿½tu", Error = ex.Message });
         }
     }
 
@@ -126,7 +182,7 @@ public class UsersController : ControllerBase
                 .OrderBy(p => p.Name)
                 .ToListAsync(cancellationToken);
 
-            // UserDto listesi olarak döndür
+            // UserDto listesi olarak dï¿½ndï¿½r
             var userDtos = users.Select(u => new UserDto
             {
                 Id = u.Id,
@@ -139,7 +195,7 @@ public class UsersController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Kullanýcýlar alýnýrken hata oluþtu", Error = ex.Message });
+            return StatusCode(500, new { Message = "Kullanï¿½cï¿½lar alï¿½nï¿½rken hata oluï¿½tu", Error = ex.Message });
         }
     }
 
@@ -152,7 +208,7 @@ public class UsersController : ControllerBase
 
             if (user is null)
             {
-                return NotFound(new { Message = "Kullanýcý bulunamadý" });
+                return NotFound(new { Message = "Kullanï¿½cï¿½ bulunamadï¿½" });
             }
 
             var userDto = new UserDto
@@ -167,7 +223,7 @@ public class UsersController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Kullanýcý alýnýrken hata oluþtu", Error = ex.Message });
+            return StatusCode(500, new { Message = "Kullanï¿½cï¿½ alï¿½nï¿½rken hata oluï¿½tu", Error = ex.Message });
         }
     }
 
@@ -180,18 +236,18 @@ public class UsersController : ControllerBase
 
             if (user is null)
             {
-                return NotFound(new { Message = "Kullanýcý bulunamadý" });
+                return NotFound(new { Message = "Kullanï¿½cï¿½ bulunamadï¿½" });
             }
 
             user.Status = status;
             user.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync(cancellationToken);
 
-            return Ok(new { Message = "Status güncellendi" });
+            return Ok(new { Message = "Status gï¿½ncellendi" });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Status güncellenirken hata oluþtu", Error = ex.Message });
+            return StatusCode(500, new { Message = "Status gï¿½ncellenirken hata oluï¿½tu", Error = ex.Message });
         }
     }
 }

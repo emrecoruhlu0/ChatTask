@@ -3,6 +3,7 @@ using ChatTask.ChatService.Hubs;
 using ChatTask.ChatService.Models;
 using ChatTask.ChatService.Services;
 using ChatTask.Shared.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ namespace ChatTask.ChatService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ChatsController : ControllerBase
 {
     private readonly ChatDbContext _context;
@@ -29,13 +31,13 @@ public class ChatsController : ControllerBase
     {
         try
         {
-            // User Service'ten kullanýcýlarý al
+            // User Service'ten kullanï¿½cï¿½larï¿½ al
             var users = await _userService.GetAllUsersAsync();
             return Ok(users);
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Kullanýcýlar alýnýrken hata oluþtu", Error = ex.Message });
+            return StatusCode(500, new { Message = "Kullanï¿½cï¿½lar alï¿½nï¿½rken hata oluï¿½tu", Error = ex.Message });
         }
     }
 
@@ -44,10 +46,10 @@ public class ChatsController : ControllerBase
     {
         try
         {
-            // User'larýn var olduðunu kontrol et
+            // User'larï¿½n var olduï¿½unu kontrol et
             if (!await _userService.UserExistsAsync(userId) || !await _userService.UserExistsAsync(toUserId))
             {
-                return BadRequest(new { Message = "Geçersiz kullanýcý ID'si" });
+                return BadRequest(new { Message = "Geï¿½ersiz kullanï¿½cï¿½ ID'si" });
             }
 
             var chats = await _context.Chats
@@ -56,7 +58,7 @@ public class ChatsController : ControllerBase
                 .OrderBy(p => p.Date)
                 .ToListAsync(cancellationToken);
 
-            // ChatDto listesi olarak döndür
+            // ChatDto listesi olarak dï¿½ndï¿½r
             var chatDtos = chats.Select(c => new ChatDto
             {
                 Id = c.Id,
@@ -70,7 +72,7 @@ public class ChatsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Mesajlar alýnýrken hata oluþtu", Error = ex.Message });
+            return StatusCode(500, new { Message = "Mesajlar alï¿½nï¿½rken hata oluï¿½tu", Error = ex.Message });
         }
     }
 
@@ -79,14 +81,14 @@ public class ChatsController : ControllerBase
     {
         try
         {
-            // User doðrulama
+            // User doï¿½rulama
             if (!await _userService.UserExistsAsync(request.UserId) ||
                 !await _userService.UserExistsAsync(request.ToUserId))
             {
-                return BadRequest(new { Message = "Geçersiz kullanýcý ID'si" });
+                return BadRequest(new { Message = "Geï¿½ersiz kullanï¿½cï¿½ ID'si" });
             }
 
-            // Chat oluþtur
+            // Chat oluï¿½tur
             Chat chat = new()
             {
                 UserId = request.UserId,
@@ -99,7 +101,7 @@ public class ChatsController : ControllerBase
             await _context.AddAsync(chat, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // SignalR ile real-time gönderim
+            // SignalR ile real-time gï¿½nderim
             try
             {
                 var connectionId = ChatHub.Users.FirstOrDefault(p => p.Value == chat.ToUserId).Key;
@@ -120,11 +122,11 @@ public class ChatsController : ControllerBase
             }
             catch (Exception signalREx)
             {
-                // SignalR hatasý loglayabilirsin ama API response'u etkilemesin
+                // SignalR hatasï¿½ loglayabilirsin ama API response'u etkilemesin
                 Console.WriteLine($"SignalR Error: {signalREx.Message}");
             }
 
-            // ChatDto olarak döndür
+            // ChatDto olarak dï¿½ndï¿½r
             var resultDto = new ChatDto
             {
                 Id = chat.Id,
@@ -138,7 +140,7 @@ public class ChatsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Mesaj gönderilirken hata oluþtu", Error = ex.Message });
+            return StatusCode(500, new { Message = "Mesaj gï¿½nderilirken hata oluï¿½tu", Error = ex.Message });
         }
     }
 
@@ -147,7 +149,7 @@ public class ChatsController : ControllerBase
     {
         try
         {
-            // Kullanýcýnýn tüm konuþmalarýný al (son mesajlarla birlikte)
+            // Kullanï¿½cï¿½nï¿½n tï¿½m konuï¿½malarï¿½nï¿½ al (son mesajlarla birlikte)
             var conversations = await _context.Chats
                 .Where(c => c.UserId == userId || c.ToUserId == userId)
                 .GroupBy(c => c.UserId == userId ? c.ToUserId : c.UserId)
@@ -163,7 +165,7 @@ public class ChatsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Konuþmalar alýnýrken hata oluþtu", Error = ex.Message });
+            return StatusCode(500, new { Message = "Konuï¿½malar alï¿½nï¿½rken hata oluï¿½tu", Error = ex.Message });
         }
     }
 
@@ -176,17 +178,17 @@ public class ChatsController : ControllerBase
 
             if (chat == null)
             {
-                return NotFound(new { Message = "Mesaj bulunamadý" });
+                return NotFound(new { Message = "Mesaj bulunamadï¿½" });
             }
 
             chat.IsRead = true;
             await _context.SaveChangesAsync(cancellationToken);
 
-            return Ok(new { Message = "Mesaj okundu olarak iþaretlendi" });
+            return Ok(new { Message = "Mesaj okundu olarak iï¿½aretlendi" });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Mesaj güncellenirken hata oluþtu", Error = ex.Message });
+            return StatusCode(500, new { Message = "Mesaj gï¿½ncellenirken hata oluï¿½tu", Error = ex.Message });
         }
     }
 }

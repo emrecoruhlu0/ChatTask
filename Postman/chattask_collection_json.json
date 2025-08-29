@@ -1,0 +1,335 @@
+{
+	"info": {
+		"_postman_id": "12345678-1234-5678-9012-123456789abc",
+		"name": "ChatTask API Tests",
+		"description": "Auth-enabled ChatTask API collection for microservices testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "1. Register User 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('User 1 registered successfully', function () {",
+							"    pm.response.to.have.status(200);",
+							"    const user = pm.response.json();",
+							"    pm.environment.set('user1Id', user.id);",
+							"    pm.environment.set('user1Name', user.name);",
+							"    console.log('User 1 ID:', user.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"TestUser1\",\n  \"password\": \"password123\"\n}"
+				},
+				"url": {
+					"raw": "{{userBase}}/api/Users/register",
+					"host": [
+						"{{userBase}}"
+					],
+					"path": [
+						"api",
+						"Users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Register User 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('User 2 registered successfully', function () {",
+							"    pm.response.to.have.status(200);",
+							"    const user = pm.response.json();",
+							"    pm.environment.set('user2Id', user.id);",
+							"    pm.environment.set('user2Name', user.name);",
+							"    console.log('User 2 ID:', user.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"TestUser3\",\n  \"password\": \"password123\"\n}"
+				},
+				"url": {
+					"raw": "{{userBase}}/api/Users/register",
+					"host": [
+						"{{userBase}}"
+					],
+					"path": [
+						"api",
+						"Users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Login successful', function () {",
+							"    pm.response.to.have.status(200);",
+							"    const response = pm.response.json();",
+							"    pm.environment.set('accessToken', response.accessToken);",
+							"    console.log('Access token saved:', response.accessToken);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userName\": \"TestUser1\",\n  \"password\": \"password123\"\n}"
+				},
+				"url": {
+					"raw": "{{authBase}}/api/auth/login",
+					"host": [
+						"{{authBase}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4. Get Users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Get users successful', function () {",
+							"    pm.response.to.have.status(200);",
+							"    const users = pm.response.json();",
+							"    if (users && users.length > 0) {",
+							"        pm.environment.set('userId1', users[0].id);",
+							"        pm.environment.set('userId2', users[1] ? users[1].id : users[0].id);",
+							"        console.log('User IDs saved:', users[0].id, users[1] ? users[1].id : 'same');",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					}
+				],
+				"url": {
+					"raw": "{{chatBase}}/api/Chats/users",
+					"host": [
+						"{{chatBase}}"
+					],
+					"path": [
+						"api",
+						"Chats",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5. Send Message",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Message sent successfully', function () {",
+							"    pm.response.to.have.status(200);",
+							"    const response = pm.response.json();",
+							"    pm.environment.set('lastMessageId', response.id);",
+							"    console.log('Message sent, ID:', response.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userId\": \"{{userId1}}\",\n  \"toUserId\": \"{{userId2}}\",\n  \"message\": \"Test message from User 1 to User 2\"\n}"
+				},
+				"url": {
+					"raw": "{{chatBase}}/api/Chats/send",
+					"host": [
+						"{{chatBase}}"
+					],
+					"path": [
+						"api",
+						"Chats",
+						"send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6. Send Reply Message",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Reply message sent successfully', function () {",
+							"    pm.response.to.have.status(200);",
+							"    const response = pm.response.json();",
+							"    console.log('Reply sent, ID:', response.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userId\": \"{{userId2}}\",\n  \"toUserId\": \"{{userId1}}\",\n  \"message\": \"Reply message from User 2 to User 1\"\n}"
+				},
+				"url": {
+					"raw": "{{chatBase}}/api/Chats/send",
+					"host": [
+						"{{chatBase}}"
+					],
+					"path": [
+						"api",
+						"Chats",
+						"send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "7. Get Chats",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Get chats successful', function () {",
+							"    pm.response.to.have.status(200);",
+							"    const chats = pm.response.json();",
+							"    console.log('Chats retrieved:', chats.length);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					}
+				],
+				"url": {
+					"raw": "{{chatBase}}/api/Chats",
+					"host": [
+						"{{chatBase}}"
+					],
+					"path": [
+						"api",
+						"Chats"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "userBase",
+			"value": "http://localhost:5001"
+		},
+		{
+			"key": "chatBase",
+			"value": "http://localhost:5002"
+		},
+		{
+			"key": "authBase",
+			"value": "http://localhost:5003"
+		}
+	]
+}

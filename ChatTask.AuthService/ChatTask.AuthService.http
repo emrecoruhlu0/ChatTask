@@ -1,0 +1,6 @@
+@ChatTask.AuthService_HostAddress = http://localhost:5043
+
+GET {{ChatTask.AuthService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

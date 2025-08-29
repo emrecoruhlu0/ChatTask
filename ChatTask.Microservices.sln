@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatTask.ChatService", "Cha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatTask.Shared", "ChatTask.Shared\ChatTask.Shared.csproj", "{A31AF2F4-FEE0-4092-AD7C-8C71C65A3187}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatTask.AuthService", "ChatTask.AuthService\ChatTask.AuthService.csproj", "{80014B59-BA91-4F22-8885-5EF36CA880D4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{A31AF2F4-FEE0-4092-AD7C-8C71C65A3187}.Release|x64.Build.0 = Release|Any CPU
 		{A31AF2F4-FEE0-4092-AD7C-8C71C65A3187}.Release|x86.ActiveCfg = Release|Any CPU
 		{A31AF2F4-FEE0-4092-AD7C-8C71C65A3187}.Release|x86.Build.0 = Release|Any CPU
+		{80014B59-BA91-4F22-8885-5EF36CA880D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80014B59-BA91-4F22-8885-5EF36CA880D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80014B59-BA91-4F22-8885-5EF36CA880D4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{80014B59-BA91-4F22-8885-5EF36CA880D4}.Debug|x64.Build.0 = Debug|Any CPU
+		{80014B59-BA91-4F22-8885-5EF36CA880D4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{80014B59-BA91-4F22-8885-5EF36CA880D4}.Debug|x86.Build.0 = Debug|Any CPU
+		{80014B59-BA91-4F22-8885-5EF36CA880D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80014B59-BA91-4F22-8885-5EF36CA880D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80014B59-BA91-4F22-8885-5EF36CA880D4}.Release|x64.ActiveCfg = Release|Any CPU
+		{80014B59-BA91-4F22-8885-5EF36CA880D4}.Release|x64.Build.0 = Release|Any CPU
+		{80014B59-BA91-4F22-8885-5EF36CA880D4}.Release|x86.ActiveCfg = Release|Any CPU
+		{80014B59-BA91-4F22-8885-5EF36CA880D4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

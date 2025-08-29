@@ -1,0 +1,239 @@
+{
+	"id": "d7d6674e-6b1f-4b63-92f4-b52a4f07a41c",
+	"name": "ChatTask API Tests",
+	"timestamp": "2025-08-28T22:16:53.238Z",
+	"collection_id": "47034976-98bbe251-e3ac-4847-8dc4-86342a491e13",
+	"folder_id": 0,
+	"environment_id": "47034976-74f59492-1601-411b-b79c-8f41a1f27a94",
+	"totalPass": 1,
+	"delay": 0,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2025-08-28T22:16:49.102Z",
+	"totalFail": 6,
+	"results": [
+		{
+			"id": "02cef1c6-07b8-4de6-b40c-8c74fd479fd4",
+			"name": "1. Register User 1",
+			"url": "http://localhost:5001/api/Users/register",
+			"time": 2235,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"User 1 registered successfully": false
+			},
+			"testPassFailCounts": {
+				"User 1 registered successfully": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				2235
+			],
+			"allTests": [
+				{
+					"User 1 registered successfully": false
+				}
+			]
+		},
+		{
+			"id": "e18f2423-b4e5-4481-b192-3b902c0a5693",
+			"name": "2. Register User 2",
+			"url": "http://localhost:5001/api/Users/register",
+			"time": 286,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"User 2 registered successfully": true
+			},
+			"testPassFailCounts": {
+				"User 2 registered successfully": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				286
+			],
+			"allTests": [
+				{
+					"User 2 registered successfully": true
+				}
+			]
+		},
+		{
+			"id": "4396b560-c8a7-4f25-9986-80aefe61fe68",
+			"name": "3. Login",
+			"url": "http://localhost:5003/api/auth/login",
+			"time": 462,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Login successful": false
+			},
+			"testPassFailCounts": {
+				"Login successful": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				462
+			],
+			"allTests": [
+				{
+					"Login successful": false
+				}
+			]
+		},
+		{
+			"id": "33aee045-088e-426c-8e27-393f6d851ea7",
+			"name": "4. Get Users",
+			"url": "http://localhost:5002/api/Chats/users",
+			"time": 117,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Get users successful": false
+			},
+			"testPassFailCounts": {
+				"Get users successful": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				117
+			],
+			"allTests": [
+				{
+					"Get users successful": false
+				}
+			]
+		},
+		{
+			"id": "0b4353e5-0d43-4c65-a60e-6b058d87cf5e",
+			"name": "5. Send Message",
+			"url": "http://localhost:5002/api/Chats/send",
+			"time": 11,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Message sent successfully": false
+			},
+			"testPassFailCounts": {
+				"Message sent successfully": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				11
+			],
+			"allTests": [
+				{
+					"Message sent successfully": false
+				}
+			]
+		},
+		{
+			"id": "07b24346-96fa-4b17-85de-dccd4276390e",
+			"name": "6. Send Reply Message",
+			"url": "http://localhost:5002/api/Chats/send",
+			"time": 6,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Reply message sent successfully": false
+			},
+			"testPassFailCounts": {
+				"Reply message sent successfully": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				6
+			],
+			"allTests": [
+				{
+					"Reply message sent successfully": false
+				}
+			]
+		},
+		{
+			"id": "1d63ae2d-f65b-4939-97d9-58278e40bf72",
+			"name": "7. Get Chats",
+			"url": "http://localhost:5002/api/Chats",
+			"time": 4,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Get chats successful": false
+			},
+			"testPassFailCounts": {
+				"Get chats successful": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				4
+			],
+			"allTests": [
+				{
+					"Get chats successful": false
+				}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 3121,
+	"collection": {
+		"requests": [
+			{
+				"id": "02cef1c6-07b8-4de6-b40c-8c74fd479fd4",
+				"method": "POST"
+			},
+			{
+				"id": "e18f2423-b4e5-4481-b192-3b902c0a5693",
+				"method": "POST"
+			},
+			{
+				"id": "4396b560-c8a7-4f25-9986-80aefe61fe68",
+				"method": "POST"
+			},
+			{
+				"id": "33aee045-088e-426c-8e27-393f6d851ea7",
+				"method": "GET"
+			},
+			{
+				"id": "0b4353e5-0d43-4c65-a60e-6b058d87cf5e",
+				"method": "POST"
+			},
+			{
+				"id": "07b24346-96fa-4b17-85de-dccd4276390e",
+				"method": "POST"
+			},
+			{
+				"id": "1d63ae2d-f65b-4939-97d9-58278e40bf72",
+				"method": "GET"
+			}
+		]
+	}
+}
