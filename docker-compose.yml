@@ -1,0 +1,82 @@
+services:
+  # SQL Server Database
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: chattask-sqlserver
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: YourStrong@Passw0rd
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - chattask-network
+
+  # UserService
+  userservice:
+    build:
+      context: .
+      dockerfile: ChatTask.UserService/Dockerfile
+    container_name: chattask-userservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5001
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=ChatTask_UserService;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+    ports:
+      - "5001:5001"
+    depends_on:
+      - sqlserver
+    networks:
+      - chattask-network
+
+  # AuthService
+  authservice:
+    build:
+      context: .
+      dockerfile: ChatTask.AuthService/Dockerfile
+    container_name: chattask-authservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5003
+      - UserService__BaseUrl=http://userservice:5001/
+      - Jwt__Issuer=chat-task
+      - Jwt__Audience=chat-task-audience
+      - Jwt__Key=dev-secret-key-change-me-please-1234567890
+      - Jwt__ExpiresMinutes=60
+    ports:
+      - "5003:5003"
+    depends_on:
+      - userservice
+    networks:
+      - chattask-network
+
+  # ChatService
+  chatservice:
+    build:
+      context: .
+      dockerfile: ChatTask.ChatService/Dockerfile
+    container_name: chattask-chatservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5002
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=ChatTask_ChatService;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+      - Services__UserService__BaseUrl=http://userservice:5001
+      - Jwt__Issuer=chat-task
+      - Jwt__Audience=chat-task-audience
+      - Jwt__Key=dev-secret-key-change-me-please-1234567890
+      - Jwt__ExpiresMinutes=60
+    ports:
+      - "5002:5002"
+    depends_on:
+      - sqlserver
+      - userservice
+    networks:
+      - chattask-network
+
+volumes:
+  sqlserver_data:
+
+networks:
+  chattask-network:
+    driver: bridge
