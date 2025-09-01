@@ -21,7 +21,7 @@ services:
     container_name: chattask-userservice
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:5001
+      - ASPNETCORE_URLS=http://0.0.0.0:5001
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=ChatTask_UserService;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
     ports:
       - "5001:5001"
@@ -38,7 +38,7 @@ services:
     container_name: chattask-authservice
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:5003
+      - ASPNETCORE_URLS=http://0.0.0.0:5003
       - UserService__BaseUrl=http://userservice:5001/
       - Jwt__Issuer=chat-task
       - Jwt__Audience=chat-task-audience
@@ -59,7 +59,7 @@ services:
     container_name: chattask-chatservice
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:5002
+      - ASPNETCORE_URLS=http://0.0.0.0:5002
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=ChatTask_ChatService;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
       - Services__UserService__BaseUrl=http://userservice:5001
       - Jwt__Issuer=chat-task

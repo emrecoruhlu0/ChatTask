@@ -2,24 +2,48 @@
 	"info": {
 		"_postman_id": "12345678-1234-5678-9012-123456789abc",
 		"name": "ChatTask API Tests",
-		"description": "Auth-enabled ChatTask API collection for microservices testing",
+		"description": "Auth-enabled ChatTask API collection with automatic unique usernames",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "12345678"
 	},
 	"item": [
 		{
-			"name": "1. Register User 1",
+			"name": "1. Register User",
 			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Benzersiz kullanıcı adı oluştur",
+							"const timestamp = Date.now();",
+							"const randomNum = Math.floor(Math.random() * 1000);",
+							"const uniqueUsername = `User_${timestamp}_${randomNum}`;",
+							"",
+							"// Environment'a kaydet",
+							"pm.environment.set('currentUsername', uniqueUsername);",
+							"",
+							"// Request body'yi güncelle",
+							"const requestBody = {",
+							"    \"name\": uniqueUsername,",
+							"    \"password\": \"password123\"",
+							"};",
+							"",
+							"pm.request.body.raw = JSON.stringify(requestBody, null, 2);",
+							"console.log('Generated username:', uniqueUsername);"
+						],
+						"type": "text/javascript"
+					}
+				},
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test('User 1 registered successfully', function () {",
+							"pm.test('User registered successfully', function () {",
 							"    pm.response.to.have.status(200);",
 							"    const user = pm.response.json();",
-							"    pm.environment.set('user1Id', user.id);",
-							"    pm.environment.set('user1Name', user.name);",
-							"    console.log('User 1 ID:', user.id);",
+							"    pm.environment.set('currentUserId', user.id);",
+							"    console.log('User registered:', pm.environment.get('currentUsername'));",
+							"    console.log('User ID:', user.id);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -36,7 +60,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"name\": \"TestUser1\",\n  \"password\": \"password123\"\n}"
+					"raw": "{\n  \"name\": \"User_1234567890_123\",\n  \"password\": \"password123\"\n}"
 				},
 				"url": {
 					"raw": "{{userBase}}/api/Users/register",
@@ -53,53 +77,27 @@
 			"response": []
 		},
 		{
-			"name": "2. Register User 2",
+			"name": "2. Login",
 			"event": [
 				{
-					"listen": "test",
+					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"pm.test('User 2 registered successfully', function () {",
-							"    pm.response.to.have.status(200);",
-							"    const user = pm.response.json();",
-							"    pm.environment.set('user2Id', user.id);",
-							"    pm.environment.set('user2Name', user.name);",
-							"    console.log('User 2 ID:', user.id);",
-							"});"
+							"// Environment'dan kullanıcı adını al",
+							"const username = pm.environment.get('currentUsername');",
+							"",
+							"// Request body'yi güncelle",
+							"const requestBody = {",
+							"    \"userName\": username,",
+							"    \"password\": \"password123\"",
+							"};",
+							"",
+							"pm.request.body.raw = JSON.stringify(requestBody, null, 2);",
+							"console.log('Logging in with username:', username);"
 						],
 						"type": "text/javascript"
 					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"name\": \"TestUser3\",\n  \"password\": \"password123\"\n}"
 				},
-				"url": {
-					"raw": "{{userBase}}/api/Users/register",
-					"host": [
-						"{{userBase}}"
-					],
-					"path": [
-						"api",
-						"Users",
-						"register"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "3. Login",
-			"event": [
 				{
 					"listen": "test",
 					"script": {
@@ -108,6 +106,7 @@
 							"    pm.response.to.have.status(200);",
 							"    const response = pm.response.json();",
 							"    pm.environment.set('accessToken', response.accessToken);",
+							"    console.log('Login successful for:', pm.environment.get('currentUsername'));",
 							"    console.log('Access token saved:', response.accessToken);",
 							"});"
 						],
@@ -125,7 +124,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"userName\": \"TestUser1\",\n  \"password\": \"password123\"\n}"
+					"raw": "{\n  \"userName\": \"User_1234567890_123\",\n  \"password\": \"password123\"\n}"
 				},
 				"url": {
 					"raw": "{{authBase}}/api/auth/login",
@@ -142,7 +141,7 @@
 			"response": []
 		},
 		{
-			"name": "4. Get Users",
+			"name": "3. Get Users",
 			"event": [
 				{
 					"listen": "test",
@@ -185,7 +184,7 @@
 			"response": []
 		},
 		{
-			"name": "5. Send Message",
+			"name": "4. Send Message",
 			"event": [
 				{
 					"listen": "test",
@@ -216,7 +215,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"userId\": \"{{userId1}}\",\n  \"toUserId\": \"{{userId2}}\",\n  \"message\": \"Test message from User 1 to User 2\"\n}"
+					"raw": "{\n  \"userId\": \"{{userId1}}\",\n  \"toUserId\": \"{{userId2}}\",\n  \"message\": \"Test message from {{currentUsername}}\"\n}"
 				},
 				"url": {
 					"raw": "{{chatBase}}/api/Chats/send",
@@ -233,54 +232,7 @@
 			"response": []
 		},
 		{
-			"name": "6. Send Reply Message",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test('Reply message sent successfully', function () {",
-							"    pm.response.to.have.status(200);",
-							"    const response = pm.response.json();",
-							"    console.log('Reply sent, ID:', response.id);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{accessToken}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"userId\": \"{{userId2}}\",\n  \"toUserId\": \"{{userId1}}\",\n  \"message\": \"Reply message from User 2 to User 1\"\n}"
-				},
-				"url": {
-					"raw": "{{chatBase}}/api/Chats/send",
-					"host": [
-						"{{chatBase}}"
-					],
-					"path": [
-						"api",
-						"Chats",
-						"send"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "7. Get Chats",
+			"name": "5. Get Chats",
 			"event": [
 				{
 					"listen": "test",

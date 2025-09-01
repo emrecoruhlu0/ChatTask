@@ -1,23 +1,21 @@
-# .NET 9 SDK image for build
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+# .NET 9 SDK image for build and runtime
+FROM mcr.microsoft.com/dotnet/sdk:9.0
 WORKDIR /app
 
 # Copy csproj and restore dependencies
-COPY *.csproj .
-COPY ../ChatTask.Shared/ChatTask.Shared.csproj ../ChatTask.Shared/
-RUN dotnet restore
+COPY ChatTask.UserService/*.csproj ./ChatTask.UserService/
+COPY ChatTask.Shared/ChatTask.Shared.csproj ./ChatTask.Shared/
+RUN dotnet restore ChatTask.UserService/ChatTask.UserService.csproj
 
 # Copy everything else and build
 COPY . .
-COPY ../ChatTask.Shared/ ../ChatTask.Shared/
-RUN dotnet publish -c Release -o out
+RUN dotnet publish ChatTask.UserService/ChatTask.UserService.csproj -c Release -o out
 
-# Runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0
-WORKDIR /app
-COPY --from=build /app/out .
+# Install EF Core tools
+RUN dotnet tool install --global dotnet-ef
 
 # Expose port
 EXPOSE 5001
 
-ENTRYPOINT ["dotnet", "ChatTask.UserService.dll"]
+# Start the application
+ENTRYPOINT ["dotnet", "out/ChatTask.UserService.dll"]

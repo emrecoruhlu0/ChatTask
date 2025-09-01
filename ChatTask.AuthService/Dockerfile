@@ -3,14 +3,13 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /app
 
 # Copy csproj and restore dependencies
-COPY *.csproj .
-COPY ../ChatTask.Shared/ChatTask.Shared.csproj ../ChatTask.Shared/
-RUN dotnet restore
+COPY ChatTask.AuthService/*.csproj ./ChatTask.AuthService/
+COPY ChatTask.Shared/ChatTask.Shared.csproj ./ChatTask.Shared/
+RUN dotnet restore ChatTask.AuthService/ChatTask.AuthService.csproj
 
 # Copy everything else and build
 COPY . .
-COPY ../ChatTask.Shared/ ../ChatTask.Shared/
-RUN dotnet publish -c Release -o out
+RUN dotnet publish ChatTask.AuthService/ChatTask.AuthService.csproj -c Release -o out
 
 # Runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
