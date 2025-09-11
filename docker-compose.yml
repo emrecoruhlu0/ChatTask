@@ -74,6 +74,17 @@ services:
     networks:
       - chattask-network
 
+  # Database Admin Interface - Adminer
+  adminer:
+    image: adminer:latest
+    container_name: chattask-adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - sqlserver
+    networks:
+      - chattask-network
+
 volumes:
   sqlserver_data:
 

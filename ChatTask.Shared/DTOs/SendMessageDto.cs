@@ -2,7 +2,8 @@
 
 public class SendMessageDto
 {
-    public Guid UserId { get; set; }
-    public Guid ToUserId { get; set; }
-    public string Message { get; set; } = string.Empty;
+    public Guid ConversationId { get; set; }
+    public Guid SenderId { get; set; }
+    public string Content { get; set; } = string.Empty;
+    public string? ThreadId { get; set; }
 }

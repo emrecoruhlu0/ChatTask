@@ -1,0 +1,859 @@
+{
+	"info": {
+		"_postman_id": "enhanced-error-handling-2024",
+		"name": "ChatTask Enhanced Error Handling Tests",
+		"description": "Comprehensive API tests with enhanced error handling, detailed validation, and unique data generation for every test run",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "enhanced-error-handling"
+	},
+	"item": [
+		{
+			"name": "🔐 User Registration Tests",
+			"item": [
+				{
+					"name": "✅ Valid User Registration",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Enhanced unique data generation",
+									"const timestamp = Date.now();",
+									"const randomNum = Math.floor(Math.random() * 10000);",
+									"const sessionId = pm.environment.get('sessionId') || Math.random().toString(36).substr(2, 9);",
+									"",
+									"// Generate unique identifiers",
+									"const uniqueUsername = `User_${sessionId}_${timestamp}_${randomNum}`;",
+									"const uniqueEmail = `${uniqueUsername}@test${randomNum}.com`;",
+									"const uniquePassword = `Pass${randomNum}@${timestamp}`;",
+									"",
+									"// Save session ID if not exists",
+									"if (!pm.environment.get('sessionId')) {",
+									"    pm.environment.set('sessionId', sessionId);",
+									"}",
+									"",
+									"// Save to environment",
+									"pm.environment.set('currentUsername', uniqueUsername);",
+									"pm.environment.set('currentEmail', uniqueEmail);",
+									"pm.environment.set('currentPassword', uniquePassword);",
+									"",
+									"// Update request body",
+									"const requestBody = {",
+									"    \"name\": uniqueUsername,",
+									"    \"email\": uniqueEmail,",
+									"    \"password\": uniquePassword",
+									"};",
+									"",
+									"pm.request.body.raw = JSON.stringify(requestBody, null, 2);",
+									"console.log('=== VALID REGISTRATION TEST ===');",
+									"console.log('Generated Username:', uniqueUsername);",
+									"console.log('Generated Email:', uniqueEmail);"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response time is acceptable', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test('Response has proper content type', function () {",
+									"    if (pm.response.headers.get('Content-Type')) {",
+									"        pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+									"    }",
+									"});",
+									"",
+									"pm.test('User registered successfully', function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"    ",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('email');",
+									"    pm.expect(responseJson).to.have.property('avatar');",
+									"    pm.expect(responseJson).to.have.property('status');",
+									"    ",
+									"    // Save user ID for later tests",
+									"    pm.environment.set('currentUserId', responseJson.id);",
+									"});",
+									"",
+									"pm.test('User has required fields', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.name).to.not.be.empty;",
+									"    pm.expect(responseJson.email).to.not.be.empty;",
+									"    pm.expect(responseJson.status).to.equal('offline');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"test_user\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Users/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "Users", "register"]
+						}
+					}
+				},
+				{
+					"name": "❌ Empty Name Registration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response time is acceptable', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test('Returns 400 Bad Request', function () {",
+									"    pm.expect(pm.response.code).to.equal(400);",
+									"});",
+									"",
+									"pm.test('Error message is descriptive', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"    pm.expect(responseJson).to.have.property('code');",
+									"    pm.expect(responseJson).to.have.property('field');",
+									"    pm.expect(responseJson.code).to.equal('NAME_REQUIRED');",
+									"    pm.expect(responseJson.field).to.equal('name');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Users/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "Users", "register"]
+						}
+					}
+				},
+				{
+					"name": "❌ Empty Password Registration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response time is acceptable', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test('Returns 400 Bad Request', function () {",
+									"    pm.expect(pm.response.code).to.equal(400);",
+									"});",
+									"",
+									"pm.test('Error message is descriptive', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"    pm.expect(responseJson).to.have.property('code');",
+									"    pm.expect(responseJson).to.have.property('field');",
+									"    pm.expect(responseJson.code).to.equal('PASSWORD_REQUIRED');",
+									"    pm.expect(responseJson.field).to.equal('password');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Users/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "Users", "register"]
+						}
+					}
+				},
+				{
+					"name": "❌ Empty Email Registration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response time is acceptable', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test('Returns 400 Bad Request', function () {",
+									"    pm.expect(pm.response.code).to.equal(400);",
+									"});",
+									"",
+									"pm.test('Error message is descriptive', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"    pm.expect(responseJson).to.have.property('code');",
+									"    pm.expect(responseJson).to.have.property('field');",
+									"    pm.expect(responseJson.code).to.equal('EMAIL_REQUIRED');",
+									"    pm.expect(responseJson.field).to.equal('email');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"testuser\",\n    \"email\": \"\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Users/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "Users", "register"]
+						}
+					}
+				},
+				{
+					"name": "❌ Invalid Email Format",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response time is acceptable', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test('Returns 400 Bad Request', function () {",
+									"    pm.expect(pm.response.code).to.equal(400);",
+									"});",
+									"",
+									"pm.test('Error message is descriptive', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"    pm.expect(responseJson).to.have.property('code');",
+									"    pm.expect(responseJson).to.have.property('field');",
+									"    pm.expect(responseJson.code).to.equal('INVALID_EMAIL_FORMAT');",
+									"    pm.expect(responseJson.field).to.equal('email');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"testuser\",\n    \"email\": \"invalid-email\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Users/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "Users", "register"]
+						}
+					}
+				},
+				{
+					"name": "❌ Password Too Short",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response time is acceptable', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test('Returns 400 Bad Request', function () {",
+									"    pm.expect(pm.response.code).to.equal(400);",
+									"});",
+									"",
+									"pm.test('Error message is descriptive', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"    pm.expect(responseJson).to.have.property('code');",
+									"    pm.expect(responseJson).to.have.property('field');",
+									"    pm.expect(responseJson.code).to.equal('PASSWORD_TOO_SHORT');",
+									"    pm.expect(responseJson.field).to.equal('password');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Users/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "Users", "register"]
+						}
+					}
+				},
+				{
+					"name": "❌ Duplicate Username",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Use existing username from environment",
+									"const existingUsername = pm.environment.get('currentUsername');",
+									"if (!existingUsername) {",
+									"    // If no existing username, create one first",
+									"    const timestamp = Date.now();",
+									"    const randomNum = Math.floor(Math.random() * 10000);",
+									"    const sessionId = Math.random().toString(36).substr(2, 9);",
+									"    const uniqueUsername = `DuplicateUser_${sessionId}_${timestamp}_${randomNum}`;",
+									"    const uniqueEmail = `${uniqueUsername}@test${randomNum}.com`;",
+									"    const uniquePassword = `Pass${randomNum}@${timestamp}`;",
+									"    ",
+									"    pm.environment.set('currentUsername', uniqueUsername);",
+									"    pm.environment.set('currentEmail', uniqueEmail);",
+									"    pm.environment.set('currentPassword', uniquePassword);",
+									"}",
+									"",
+									"// Update request body with existing username",
+									"const requestBody = {",
+									"    \"name\": pm.environment.get('currentUsername'),",
+									"    \"email\": `duplicate_${Date.now()}@example.com`,",
+									"    \"password\": \"password123\"",
+									"};",
+									"",
+									"pm.request.body.raw = JSON.stringify(requestBody, null, 2);",
+									"console.log('=== DUPLICATE USERNAME TEST ===');",
+									"console.log('Using existing username:', pm.environment.get('currentUsername'));"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response time is acceptable', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test('Returns 409 Conflict', function () {",
+									"    pm.expect(pm.response.code).to.equal(409);",
+									"});",
+									"",
+									"pm.test('Error message is descriptive', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"    pm.expect(responseJson).to.have.property('code');",
+									"    pm.expect(responseJson).to.have.property('field');",
+									"    pm.expect(responseJson).to.have.property('suggestion');",
+									"    pm.expect(responseJson.code).to.equal('USERNAME_ALREADY_EXISTS');",
+									"    pm.expect(responseJson.field).to.equal('name');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"existing_user\",\n    \"email\": \"duplicate@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Users/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "Users", "register"]
+						}
+					}
+				},
+				{
+					"name": "❌ Duplicate Email",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Use existing email from environment",
+									"const existingEmail = pm.environment.get('currentEmail');",
+									"if (!existingEmail) {",
+									"    // If no existing email, create one first",
+									"    const timestamp = Date.now();",
+									"    const randomNum = Math.floor(Math.random() * 10000);",
+									"    const sessionId = Math.random().toString(36).substr(2, 9);",
+									"    const uniqueUsername = `DuplicateEmailUser_${sessionId}_${timestamp}_${randomNum}`;",
+									"    const uniqueEmail = `duplicate_${uniqueUsername}@test${randomNum}.com`;",
+									"    const uniquePassword = `Pass${randomNum}@${timestamp}`;",
+									"    ",
+									"    pm.environment.set('currentUsername', uniqueUsername);",
+									"    pm.environment.set('currentEmail', uniqueEmail);",
+									"    pm.environment.set('currentPassword', uniquePassword);",
+									"}",
+									"",
+									"// Update request body with existing email",
+									"const requestBody = {",
+									"    \"name\": `duplicate_${Date.now()}`,",
+									"    \"email\": pm.environment.get('currentEmail'),",
+									"    \"password\": \"password123\"",
+									"};",
+									"",
+									"pm.request.body.raw = JSON.stringify(requestBody, null, 2);",
+									"console.log('=== DUPLICATE EMAIL TEST ===');",
+									"console.log('Using existing email:', pm.environment.get('currentEmail'));"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response time is acceptable', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test('Returns 409 Conflict', function () {",
+									"    pm.expect(pm.response.code).to.equal(409);",
+									"});",
+									"",
+									"pm.test('Error message is descriptive', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"    pm.expect(responseJson).to.have.property('code');",
+									"    pm.expect(responseJson).to.have.property('field');",
+									"    pm.expect(responseJson).to.have.property('suggestion');",
+									"    pm.expect(responseJson.code).to.equal('EMAIL_ALREADY_EXISTS');",
+									"    pm.expect(responseJson.field).to.equal('email');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"duplicate_user\",\n    \"email\": \"existing@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Users/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "Users", "register"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🔑 User Authentication Tests",
+			"item": [
+				{
+					"name": "✅ Valid Login",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Use existing credentials from environment",
+									"const username = pm.environment.get('currentUsername');",
+									"const password = pm.environment.get('currentPassword');",
+									"",
+									"if (!username || !password) {",
+									"    console.log('No existing credentials found, using test credentials');",
+									"    pm.environment.set('currentUsername', 'testuser');",
+									"    pm.environment.set('currentPassword', 'password123');",
+									"}",
+									"",
+									"// Update request body",
+									"const requestBody = {",
+									"    \"userName\": pm.environment.get('currentUsername'),",
+									"    \"password\": pm.environment.get('currentPassword')",
+									"};",
+									"",
+									"pm.request.body.raw = JSON.stringify(requestBody, null, 2);",
+									"console.log('=== VALID LOGIN TEST ===');",
+									"console.log('Username:', pm.environment.get('currentUsername'));"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response time is acceptable', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test('Response has proper content type', function () {",
+									"    if (pm.response.headers.get('Content-Type')) {",
+									"        pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+									"    }",
+									"});",
+									"",
+									"pm.test('Login successful', function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"    ",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('email');",
+									"    pm.expect(responseJson).to.have.property('avatar');",
+									"    pm.expect(responseJson).to.have.property('status');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userName\": \"testuser\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Users/validate",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "Users", "validate"]
+						}
+					}
+				},
+				{
+					"name": "❌ Empty Username Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response time is acceptable', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test('Returns 400 Bad Request', function () {",
+									"    pm.expect(pm.response.code).to.equal(400);",
+									"});",
+									"",
+									"pm.test('Error message is descriptive', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"    pm.expect(responseJson).to.have.property('code');",
+									"    pm.expect(responseJson).to.have.property('field');",
+									"    pm.expect(responseJson.code).to.equal('USERNAME_REQUIRED');",
+									"    pm.expect(responseJson.field).to.equal('userName');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userName\": \"\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Users/validate",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "Users", "validate"]
+						}
+					}
+				},
+				{
+					"name": "❌ Empty Password Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response time is acceptable', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test('Returns 400 Bad Request', function () {",
+									"    pm.expect(pm.response.code).to.equal(400);",
+									"});",
+									"",
+									"pm.test('Error message is descriptive', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"    pm.expect(responseJson).to.have.property('code');",
+									"    pm.expect(responseJson).to.have.property('field');",
+									"    pm.expect(responseJson.code).to.equal('PASSWORD_REQUIRED');",
+									"    pm.expect(responseJson.field).to.equal('password');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userName\": \"testuser\",\n    \"password\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Users/validate",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "Users", "validate"]
+						}
+					}
+				},
+				{
+					"name": "❌ Invalid Username Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response time is acceptable', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test('Returns 401 Unauthorized', function () {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});",
+									"",
+									"pm.test('Error message is descriptive', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"    pm.expect(responseJson).to.have.property('code');",
+									"    pm.expect(responseJson).to.have.property('field');",
+									"    pm.expect(responseJson.code).to.equal('INVALID_CREDENTIALS');",
+									"    pm.expect(responseJson.field).to.equal('userName');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userName\": \"nonexistentuser\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Users/validate",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "Users", "validate"]
+						}
+					}
+				},
+				{
+					"name": "❌ Invalid Password Login",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Use existing username but wrong password",
+									"const username = pm.environment.get('currentUsername');",
+									"if (!username) {",
+									"    pm.environment.set('currentUsername', 'testuser');",
+									"}",
+									"",
+									"// Update request body",
+									"const requestBody = {",
+									"    \"userName\": pm.environment.get('currentUsername'),",
+									"    \"password\": \"wrongpassword\"",
+									"};",
+									"",
+									"pm.request.body.raw = JSON.stringify(requestBody, null, 2);",
+									"console.log('=== INVALID PASSWORD TEST ===');",
+									"console.log('Username:', pm.environment.get('currentUsername'));"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Response time is acceptable', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test('Returns 401 Unauthorized', function () {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});",
+									"",
+									"pm.test('Error message is descriptive', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"    pm.expect(responseJson).to.have.property('code');",
+									"    pm.expect(responseJson).to.have.property('field');",
+									"    pm.expect(responseJson.code).to.equal('INVALID_CREDENTIALS');",
+									"    pm.expect(responseJson.field).to.equal('password');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userName\": \"testuser\",\n    \"password\": \"wrongpassword\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Users/validate",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "Users", "validate"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"exec": [
+					"// Global pre-request script for enhanced unique data",
+					"console.log('🚀 === ENHANCED ERROR HANDLING TEST RUN ===');",
+					"console.log('Request to:', pm.request.url);",
+					"console.log('Method:', pm.request.method);",
+					"",
+					"// Initialize session ID if not exists",
+					"if (!pm.environment.get('sessionId')) {",
+					"    const sessionId = Math.random().toString(36).substr(2, 9);",
+					"    pm.environment.set('sessionId', sessionId);",
+					"    console.log('🆔 New Session ID generated:', sessionId);",
+					"} else {",
+					"    console.log('🆔 Using existing Session ID:', pm.environment.get('sessionId'));",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"exec": [
+					"// Global test script with enhanced logging",
+					"pm.test('Response time is acceptable', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});",
+					"",
+					"pm.test('Response has proper content type', function () {",
+					"    if (pm.response.headers.get('Content-Type')) {",
+					"        pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+					"    }",
+					"});",
+					"",
+					"// Enhanced error logging",
+					"if (pm.response.code >= 400) {",
+					"    console.log('❌ Error Response:', pm.response.text());",
+					"    ",
+					"    try {",
+					"        const errorJson = pm.response.json();",
+					"        if (errorJson.code) {",
+					"            console.log('🔍 Error Code:', errorJson.code);",
+					"        }",
+					"        if (errorJson.field) {",
+					"            console.log('📍 Error Field:', errorJson.field);",
+					"        }",
+					"        if (errorJson.suggestion) {",
+					"            console.log('💡 Suggestion:', errorJson.suggestion);",
+					"        }",
+					"    } catch (e) {",
+					"        console.log('⚠️ Could not parse error response as JSON');",
+					"    }",
+					"} else {",
+					"    console.log('✅ Success Response Code:', pm.response.code);",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5001",
+			"type": "string"
+		}
+	]
+}

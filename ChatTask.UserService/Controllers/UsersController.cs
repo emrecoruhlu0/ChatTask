@@ -25,19 +25,59 @@ public class UsersController : ControllerBase
         try
         {
             // Debug logging
-            Console.WriteLine($"Register request received - Name: '{request.Name}', Password: '{request.Password}'");
+            Console.WriteLine($"Register request received - Name: '{request.Name}', Email: '{request.Email}', Password: '{request.Password}'");
             
             // Validation
-            if (string.IsNullOrEmpty(request.Name))
+            if (string.IsNullOrWhiteSpace(request.Name))
             {
-                Console.WriteLine("Name is null or empty");
-                return BadRequest(new { Message = "Name is required" });
+                Console.WriteLine("Name is null, empty or whitespace");
+                return BadRequest(new { 
+                    Message = "Kullanıcı adı gereklidir", 
+                    Code = "NAME_REQUIRED",
+                    Field = "name"
+                });
             }
             
-            if (string.IsNullOrEmpty(request.Password))
+            if (string.IsNullOrWhiteSpace(request.Password))
             {
-                Console.WriteLine("Password is null or empty");
-                return BadRequest(new { Message = "Password is required" });
+                Console.WriteLine("Password is null, empty or whitespace");
+                return BadRequest(new { 
+                    Message = "Şifre gereklidir", 
+                    Code = "PASSWORD_REQUIRED",
+                    Field = "password"
+                });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Email))
+            {
+                Console.WriteLine("Email is null, empty or whitespace");
+                return BadRequest(new { 
+                    Message = "E-posta adresi gereklidir", 
+                    Code = "EMAIL_REQUIRED",
+                    Field = "email"
+                });
+            }
+
+            // Email format validation
+            if (!IsValidEmail(request.Email))
+            {
+                Console.WriteLine($"Invalid email format: '{request.Email}'");
+                return BadRequest(new { 
+                    Message = "Geçersiz e-posta formatı", 
+                    Code = "INVALID_EMAIL_FORMAT",
+                    Field = "email"
+                });
+            }
+
+            // Password strength validation
+            if (request.Password.Length < 6)
+            {
+                Console.WriteLine("Password too short");
+                return BadRequest(new { 
+                    Message = "Şifre en az 6 karakter olmalıdır", 
+                    Code = "PASSWORD_TOO_SHORT",
+                    Field = "password"
+                });
             }
 
             // Name kontrolü
@@ -46,7 +86,26 @@ public class UsersController : ControllerBase
             if (isNameExists)
             {
                 Console.WriteLine($"User name '{request.Name}' already exists");
-                return BadRequest(new { Message = "Bu kullanıcı adı daha önce kullanılmış" });
+                return Conflict(new { 
+                    Message = "Bu kullanıcı adı daha önce kullanılmış", 
+                    Code = "USERNAME_ALREADY_EXISTS",
+                    Field = "name",
+                    Suggestion = "Farklı bir kullanıcı adı deneyin"
+                });
+            }
+
+            // Email kontrolü
+            bool isEmailExists = await _context.Users.AnyAsync(p => p.Email == request.Email, cancellationToken);
+
+            if (isEmailExists)
+            {
+                Console.WriteLine($"Email '{request.Email}' already exists");
+                return Conflict(new { 
+                    Message = "Bu e-posta adresi daha önce kullanılmış", 
+                    Code = "EMAIL_ALREADY_EXISTS",
+                    Field = "email",
+                    Suggestion = "Farklı bir e-posta adresi kullanın"
+                });
             }
 
             // Default avatar (PNG yükleme zorunlu değil)
@@ -59,6 +118,7 @@ public class UsersController : ControllerBase
             User user = new()
             {
                 Name = request.Name,
+                Email = request.Email,
                 Avatar = avatar,
                 Status = "offline",
                 PasswordHash = hash,
@@ -77,6 +137,7 @@ public class UsersController : ControllerBase
             {
                 Id = user.Id,
                 Name = user.Name,
+                Email = request.Email,
                 Avatar = user.Avatar,
                 Status = user.Status
             };
@@ -86,7 +147,12 @@ public class UsersController : ControllerBase
         catch (Exception ex)
         {
             Console.WriteLine($"Register error: {ex.Message}");
-            return StatusCode(500, new { Message = "Kayıt sırasında hata oluştu", Error = ex.Message });
+            return StatusCode(500, new { 
+                Message = "Kayıt sırasında beklenmeyen bir hata oluştu", 
+                Code = "REGISTRATION_ERROR",
+                Error = ex.Message,
+                Timestamp = DateTime.UtcNow
+            });
         }
     }
 
@@ -95,28 +161,61 @@ public class UsersController : ControllerBase
     {
         try
         {
+            // Validation
+            if (string.IsNullOrWhiteSpace(request.UserName))
+            {
+                return BadRequest(new { 
+                    Message = "Kullanıcı adı gereklidir", 
+                    Code = "USERNAME_REQUIRED",
+                    Field = "userName"
+                });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Password))
+            {
+                return BadRequest(new { 
+                    Message = "Şifre gereklidir", 
+                    Code = "PASSWORD_REQUIRED",
+                    Field = "password"
+                });
+            }
+
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Name == request.UserName, cancellationToken);
             if (user is null)
             {
-                return Unauthorized(new { Message = "Geersiz kullanc veya parola" });
+                return Unauthorized(new { 
+                    Message = "Kullanıcı adı veya şifre hatalı", 
+                    Code = "INVALID_CREDENTIALS",
+                    Field = "userName"
+                });
             }
 
             if (!VerifyPassword(request.Password, user.PasswordHash, user.PasswordSalt))
             {
-                return Unauthorized(new { Message = "Geersiz kullanc veya parola" });
+                return Unauthorized(new { 
+                    Message = "Kullanıcı adı veya şifre hatalı", 
+                    Code = "INVALID_CREDENTIALS",
+                    Field = "password"
+                });
             }
 
             return Ok(new UserDto
             {
                 Id = user.Id,
                 Name = user.Name,
+                Email = user.Email,
                 Avatar = user.Avatar,
                 Status = user.Status
             });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Dorulama srasnda hata olutu", Error = ex.Message });
+            return StatusCode(500, new { 
+                Message = "Doğrulama sırasında beklenmeyen bir hata oluştu", 
+                Code = "VALIDATION_ERROR",
+                Error = ex.Message,
+                Timestamp = DateTime.UtcNow
+            });
         }
     }
 
@@ -137,6 +236,19 @@ public class UsersController : ControllerBase
         using var pbkdf2 = new Rfc2898DeriveBytes(password, saltBytes, 100000, HashAlgorithmName.SHA256);
         var computedHash = Convert.ToBase64String(pbkdf2.GetBytes(32));
         return CryptographicOperations.FixedTimeEquals(Convert.FromBase64String(storedHash), Convert.FromBase64String(computedHash));
+    }
+
+    private static bool IsValidEmail(string email)
+    {
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     [HttpGet("login")]
@@ -161,6 +273,7 @@ public class UsersController : ControllerBase
             {
                 Id = user.Id,
                 Name = user.Name,
+                Email = user.Email,
                 Avatar = user.Avatar,
                 Status = user.Status
             };
@@ -187,6 +300,7 @@ public class UsersController : ControllerBase
             {
                 Id = u.Id,
                 Name = u.Name,
+                Email = u.Email,
                 Avatar = u.Avatar,
                 Status = u.Status
             }).ToList();
@@ -215,6 +329,7 @@ public class UsersController : ControllerBase
             {
                 Id = user.Id,
                 Name = user.Name,
+                Email = user.Email,
                 Avatar = user.Avatar,
                 Status = user.Status
             };

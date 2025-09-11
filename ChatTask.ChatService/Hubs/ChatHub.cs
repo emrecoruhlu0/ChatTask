@@ -1,4 +1,5 @@
 using ChatTask.ChatService.Services;
+using ChatTask.Shared.DTOs;
 using Microsoft.AspNetCore.SignalR;
 
 namespace ChatTask.ChatService.Hubs;
@@ -17,17 +18,17 @@ public class ChatHub : Hub
     {
         try
         {
-            // User'ýn var olduðunu kontrol et
+            // User'ï¿½n var olduï¿½unu kontrol et
             if (!await _userService.UserExistsAsync(userId))
             {
-                await Clients.Caller.SendAsync("Error", "Geçersiz kullanýcý ID'si");
+                await Clients.Caller.SendAsync("Error", "Geï¿½ersiz kullanï¿½cï¿½ ID'si");
                 return;
             }
 
             // Connection mapping ekle
             Users.Add(Context.ConnectionId, userId);
 
-            // Diðer kullanýcýlara online durumunu bildir
+            // Diï¿½er kullanï¿½cï¿½lara online durumunu bildir
             await Clients.All.SendAsync("UserStatusChanged", new
             {
                 UserId = userId,
@@ -40,37 +41,128 @@ public class ChatHub : Hub
         catch (Exception ex)
         {
             Console.WriteLine($"Connect Error: {ex.Message}");
-            await Clients.Caller.SendAsync("Error", "Baðlantý sýrasýnda hata oluþtu");
+            await Clients.Caller.SendAsync("Error", "Baï¿½lantï¿½ sï¿½rasï¿½nda hata oluï¿½tu");
         }
     }
 
-    public async Task JoinRoom(string roomId)
+    public async Task JoinConversation(Guid conversationId)
     {
         try
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-            await Clients.Group(roomId).SendAsync("UserJoinedRoom", Context.ConnectionId, roomId);
+            var userId = Users.GetValueOrDefault(Context.ConnectionId);
+            
+            // Yetki kontrolÃ¼ burada yapÄ±labilir
+            // var canJoin = await CanJoinConversation(userId, conversationId);
+            // if (!canJoin) return;
+            
+            await Groups.AddToGroupAsync(Context.ConnectionId, conversationId.ToString());
+            await Clients.Group(conversationId.ToString()).SendAsync("UserJoinedConversation", new
+            {
+                UserId = userId,
+                ConversationId = conversationId,
+                ConnectionId = Context.ConnectionId,
+                Timestamp = DateTime.UtcNow
+            });
+            
+            Console.WriteLine($"User {userId} joined conversation {conversationId}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"JoinRoom Error: {ex.Message}");
+            Console.WriteLine($"JoinConversation Error: {ex.Message}");
+            await Clients.Caller.SendAsync("Error", "Conversation'a katÄ±lÄ±rken hata oluÅŸtu");
+        }
+    }
+
+    public async Task LeaveConversation(Guid conversationId)
+    {
+        try
+        {
+            var userId = Users.GetValueOrDefault(Context.ConnectionId);
+            
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId.ToString());
+            await Clients.Group(conversationId.ToString()).SendAsync("UserLeftConversation", new
+            {
+                UserId = userId,
+                ConversationId = conversationId,
+                ConnectionId = Context.ConnectionId,
+                Timestamp = DateTime.UtcNow
+            });
+            
+            Console.WriteLine($"User {userId} left conversation {conversationId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"LeaveConversation Error: {ex.Message}");
+        }
+    }
+
+    // YENÄ°: Conversation'da typing indicator
+    public async Task SendTypingIndicator(Guid conversationId, bool isTyping)
+    {
+        try
+        {
+            var userId = Users.GetValueOrDefault(Context.ConnectionId);
+            
+            await Clients.Group(conversationId.ToString()).SendAsync("TypingIndicator", new
+            {
+                ConversationId = conversationId,
+                UserId = userId,
+                IsTyping = isTyping,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"SendTypingIndicator Error: {ex.Message}");
+        }
+    }
+
+    // YENÄ°: Mesaj gÃ¶nderme (real-time iÃ§in)
+    public async Task SendMessageToConversation(MessageDto message)
+    {
+        try
+        {
+            var userId = Users.GetValueOrDefault(Context.ConnectionId);
+            
+            // GÃ¼venlik: Sadece kendi mesajlarÄ±nÄ± gÃ¶nderebilir
+            if (message.SenderId != userId)
+            {
+                await Clients.Caller.SendAsync("Error", "Sadece kendi mesajlarÄ±nÄ±zÄ± gÃ¶nderebilirsiniz");
+                return;
+            }
+            
+            // Conversation'daki tÃ¼m Ã¼yelere gÃ¶nder (kendisi hariÃ§)
+            await Clients.GroupExcept(message.ConversationId.ToString(), Context.ConnectionId)
+                .SendAsync("NewMessage", message);
+                
+            Console.WriteLine($"Message sent to conversation {message.ConversationId} by user {userId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"SendMessageToConversation Error: {ex.Message}");
+            await Clients.Caller.SendAsync("Error", "Mesaj gÃ¶nderilirken hata oluÅŸtu");
+        }
+    }
+
+    // DEPRECATED: Eski metodlar uyumluluk iÃ§in kalsÄ±n
+    public async Task JoinRoom(string roomId)
+    {
+        if (Guid.TryParse(roomId, out Guid conversationId))
+        {
+            await JoinConversation(conversationId);
         }
     }
 
     public async Task LeaveRoom(string roomId)
     {
-        try
+        if (Guid.TryParse(roomId, out Guid conversationId))
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
-            await Clients.Group(roomId).SendAsync("UserLeftRoom", Context.ConnectionId, roomId);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"LeaveRoom Error: {ex.Message}");
+            await LeaveConversation(conversationId);
         }
     }
 
-    public async Task SendTypingIndicator(Guid toUserId, bool isTyping)
+    // DEPRECATED: Eski direct typing indicator
+    public async Task SendTypingIndicatorToUser(Guid toUserId, bool isTyping)
     {
         try
         {
@@ -81,6 +173,7 @@ public class ChatHub : Hub
                 await Clients.Client(connectionId).SendAsync("TypingIndicator", new
                 {
                     FromUserId = Users.GetValueOrDefault(Context.ConnectionId),
+                    ToUserId = toUserId,
                     IsTyping = isTyping,
                     Timestamp = DateTime.UtcNow
                 });
@@ -88,7 +181,7 @@ public class ChatHub : Hub
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"SendTypingIndicator Error: {ex.Message}");
+            Console.WriteLine($"SendTypingIndicatorToUser Error: {ex.Message}");
         }
     }
 
@@ -100,7 +193,7 @@ public class ChatHub : Hub
             {
                 Users.Remove(Context.ConnectionId);
 
-                // Diðer kullanýcýlara offline durumunu bildir
+                // Diï¿½er kullanï¿½cï¿½lara offline durumunu bildir
                 await Clients.All.SendAsync("UserStatusChanged", new
                 {
                     UserId = userId,

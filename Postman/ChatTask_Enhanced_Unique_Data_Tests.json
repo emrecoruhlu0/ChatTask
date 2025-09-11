@@ -1,0 +1,448 @@
+{
+	"info": {
+		"_postman_id": "enhanced-unique-data-2024",
+		"name": "ChatTask Enhanced Unique Data Tests",
+		"description": "ChatTask API tests with enhanced unique data generation for every test run",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "enhanced-unique-data"
+	},
+	"item": [
+		{
+			"name": "🔐 Authentication & User Management",
+			"item": [
+				{
+					"name": "1. Register User (Enhanced Unique)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Enhanced unique data generation",
+									"const timestamp = Date.now();",
+									"const randomNum = Math.floor(Math.random() * 10000);",
+									"const sessionId = pm.environment.get('sessionId') || Math.random().toString(36).substr(2, 9);",
+									"",
+									"// Generate unique identifiers",
+									"const uniqueUsername = `User_${sessionId}_${timestamp}_${randomNum}`;",
+									"const uniqueEmail = `${uniqueUsername}@test${randomNum}.com`;",
+									"const uniquePassword = `Pass${randomNum}@${timestamp}`;",
+									"",
+									"// Save session ID if not exists",
+									"if (!pm.environment.get('sessionId')) {",
+									"    pm.environment.set('sessionId', sessionId);",
+									"}",
+									"",
+									"// Save to environment",
+									"pm.environment.set('currentUsername', uniqueUsername);",
+									"pm.environment.set('currentEmail', uniqueEmail);",
+									"pm.environment.set('currentPassword', uniquePassword);",
+									"",
+									"// Update request body",
+									"const requestBody = {",
+									"    \"name\": uniqueUsername,",
+									"    \"email\": uniqueEmail,",
+									"    \"password\": uniquePassword",
+									"};",
+									"",
+									"pm.request.body.raw = JSON.stringify(requestBody, null, 2);",
+									"console.log('=== ENHANCED UNIQUE DATA GENERATION ===');",
+									"console.log('Session ID:', sessionId);",
+									"console.log('Generated Username:', uniqueUsername);",
+									"console.log('Generated Email:', uniqueEmail);",
+									"console.log('Generated Password:', uniquePassword);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('User registered successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const user = pm.response.json();",
+									"    pm.environment.set('currentUserId', user.id);",
+									"    console.log('✅ User registered:', pm.environment.get('currentUsername'));",
+									"    console.log('✅ User ID:', user.id);",
+									"});",
+									"",
+									"pm.test('User has required fields', function () {",
+									"    const user = pm.response.json();",
+									"    pm.expect(user).to.have.property('id');",
+									"    pm.expect(user).to.have.property('name');",
+									"    pm.expect(user).to.have.property('email');",
+									"    pm.expect(user.name).to.equal(pm.environment.get('currentUsername'));",
+									"    pm.expect(user.email).to.equal(pm.environment.get('currentEmail'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"User_1234567890_123\",\n  \"email\": \"User_1234567890_123@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{userBase}}/api/Users/register",
+							"host": [
+								"{{userBase}}"
+							],
+							"path": [
+								"api",
+								"Users",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Login User (Enhanced Unique)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Get unique data from environment",
+									"const username = pm.environment.get('currentUsername');",
+									"const password = pm.environment.get('currentPassword');",
+									"",
+									"// Update request body",
+									"const requestBody = {",
+									"    \"userName\": username,",
+									"    \"password\": password",
+									"};",
+									"",
+									"pm.request.body.raw = JSON.stringify(requestBody, null, 2);",
+									"console.log('🔐 Logging in with unique credentials:');",
+									"console.log('Username:', username);",
+									"console.log('Password:', password);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('accessToken', response.accessToken);",
+									"    console.log('✅ Login successful with unique credentials');",
+									"});",
+									"",
+									"pm.test('Response contains access token', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('accessToken');",
+									"    pm.expect(response.accessToken).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userName\": \"User_1234567890_123\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{authBase}}/api/Auth/login",
+							"host": [
+								"{{authBase}}"
+							],
+							"path": [
+								"api",
+								"Auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🏢 Workspace Management (Enhanced Unique)",
+			"item": [
+				{
+					"name": "Create Workspace (Enhanced Unique)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate unique workspace data",
+									"const timestamp = Date.now();",
+									"const randomNum = Math.floor(Math.random() * 10000);",
+									"const sessionId = pm.environment.get('sessionId');",
+									"",
+									"// Generate unique workspace identifiers",
+									"const workspaceName = `Workspace_${sessionId}_${timestamp}_${randomNum}`;",
+									"const workspaceDomain = `workspace${sessionId}${randomNum}`.toLowerCase();",
+									"",
+									"pm.environment.set('workspaceName', workspaceName);",
+									"pm.environment.set('workspaceDomain', workspaceDomain);",
+									"",
+									"const requestBody = {",
+									"    \"name\": workspaceName,",
+									"    \"domain\": workspaceDomain",
+									"};",
+									"",
+									"pm.request.body.raw = JSON.stringify(requestBody, null, 2);",
+									"console.log('🏢 Creating unique workspace:');",
+									"console.log('Workspace Name:', workspaceName);",
+									"console.log('Workspace Domain:', workspaceDomain);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Workspace created successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const workspace = pm.response.json();",
+									"    pm.environment.set('workspaceId', workspace.id);",
+									"    console.log('✅ Workspace created:', workspace.name);",
+									"    console.log('✅ Workspace ID:', workspace.id);",
+									"});",
+									"",
+									"pm.test('Workspace has required fields', function () {",
+									"    const workspace = pm.response.json();",
+									"    pm.expect(workspace).to.have.property('id');",
+									"    pm.expect(workspace).to.have.property('name');",
+									"    pm.expect(workspace).to.have.property('domain');",
+									"    pm.expect(workspace.name).to.equal(pm.environment.get('workspaceName'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Company\",\n  \"domain\": \"testcompany\"\n}"
+						},
+						"url": {
+							"raw": "{{chatBase}}/api/conversation/workspaces",
+							"host": [
+								"{{chatBase}}"
+							],
+							"path": [
+								"api",
+								"conversation",
+								"workspaces"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "💬 Conversation Management (Enhanced Unique)",
+			"item": [
+				{
+					"name": "Create Channel (Enhanced Unique)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate unique channel data",
+									"const timestamp = Date.now();",
+									"const randomNum = Math.floor(Math.random() * 10000);",
+									"const sessionId = pm.environment.get('sessionId');",
+									"",
+									"// Generate unique channel identifiers",
+									"const channelName = `channel_${sessionId}_${timestamp}_${randomNum}`;",
+									"const channelDescription = `Unique channel description for ${channelName}`;",
+									"const channelTopic = `Topic for ${channelName} - Session ${sessionId}`;",
+									"",
+									"pm.environment.set('channelName', channelName);",
+									"pm.environment.set('channelDescription', channelDescription);",
+									"pm.environment.set('channelTopic', channelTopic);",
+									"",
+									"const requestBody = {",
+									"    \"name\": channelName,",
+									"    \"description\": channelDescription,",
+									"    \"type\": 1, // Channel",
+									"    \"isPrivate\": false,",
+									"    \"topic\": channelTopic,",
+									"    \"channelPurpose\": 1, // General",
+									"    \"autoAddNewMembers\": true,",
+									"    \"createdById\": pm.environment.get('currentUserId'),",
+									"    \"initialMemberIds\": [pm.environment.get('currentUserId')]",
+									"};",
+									"",
+									"pm.request.body.raw = JSON.stringify(requestBody, null, 2);",
+									"console.log('💬 Creating unique channel:');",
+									"console.log('Channel Name:', channelName);",
+									"console.log('Channel Description:', channelDescription);",
+									"console.log('Channel Topic:', channelTopic);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Channel created successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const channel = pm.response.json();",
+									"    pm.environment.set('channelId', channel.id);",
+									"    console.log('✅ Channel created:', channel.name);",
+									"    console.log('✅ Channel ID:', channel.id);",
+									"});",
+									"",
+									"pm.test('Channel has required fields', function () {",
+									"    const channel = pm.response.json();",
+									"    pm.expect(channel).to.have.property('id');",
+									"    pm.expect(channel).to.have.property('name');",
+									"    pm.expect(channel).to.have.property('type');",
+									"    pm.expect(channel.type).to.equal(1); // Channel type",
+									"    pm.expect(channel.name).to.equal(pm.environment.get('channelName'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"general\",\n  \"description\": \"General discussion channel\",\n  \"type\": 1,\n  \"isPrivate\": false,\n  \"topic\": \"Company-wide discussions\",\n  \"channelPurpose\": 1,\n  \"autoAddNewMembers\": true,\n  \"createdById\": \"{{currentUserId}}\",\n  \"initialMemberIds\": [\"{{currentUserId}}\"]\n}"
+						},
+						"url": {
+							"raw": "{{chatBase}}/api/conversation/workspaces/{{workspaceId}}/channels",
+							"host": [
+								"{{chatBase}}"
+							],
+							"path": [
+								"api",
+								"conversation",
+								"workspaces",
+								"{{workspaceId}}",
+								"channels"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global pre-request script for enhanced unique data",
+					"console.log('🚀 === ENHANCED UNIQUE DATA TEST RUN ===');",
+					"console.log('Request to:', pm.request.url);",
+					"console.log('Method:', pm.request.method);",
+					"",
+					"// Initialize session ID if not exists",
+					"if (!pm.environment.get('sessionId')) {",
+					"    const sessionId = Math.random().toString(36).substr(2, 9);",
+					"    pm.environment.set('sessionId', sessionId);",
+					"    console.log('🆔 New Session ID generated:', sessionId);",
+					"} else {",
+					"    console.log('🆔 Using existing Session ID:', pm.environment.get('sessionId'));",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script with enhanced logging",
+					"pm.test('Response time is acceptable', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});",
+					"",
+					"pm.test('Response has proper content type', function () {",
+					"    if (pm.response.headers.get('Content-Type')) {",
+					"        pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+					"    }",
+					"});",
+					"",
+					"// Enhanced error logging",
+					"if (pm.response.code >= 400) {",
+					"    console.log('❌ Error Response:', pm.response.text());",
+					"} else {",
+					"    console.log('✅ Success Response Code:', pm.response.code);",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "userBase",
+			"value": "http://localhost:5001",
+			"type": "string"
+		},
+		{
+			"key": "authBase",
+			"value": "http://localhost:5003",
+			"type": "string"
+		},
+		{
+			"key": "chatBase",
+			"value": "http://localhost:5002",
+			"type": "string"
+		},
+		{
+			"key": "taskBase",
+			"value": "http://localhost:5004",
+			"type": "string"
+		}
+	]
+}
