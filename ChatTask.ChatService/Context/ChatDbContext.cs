@@ -1,5 +1,4 @@
-using ChatTask.Shared.Models;
-using ChatTask.Shared.Models.Conversations;
+using ChatTask.ChatService.Models;
 using ChatTask.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,7 +19,6 @@ public class ChatDbContext : DbContext
     public DbSet<TaskGroup> TaskGroups { get; set; }
     public DbSet<Member> Members { get; set; }
     public DbSet<Message> Messages { get; set; }
-    public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,15 +26,15 @@ public class ChatDbContext : DbContext
 
         // Conversation inheritance - Table Per Hierarchy (TPH)
         modelBuilder.Entity<Conversation>()
-            .HasDiscriminator<ChatTask.Shared.Enums.ConversationType>("Type")
-            .HasValue<Channel>(ChatTask.Shared.Enums.ConversationType.Channel)
-            .HasValue<Group>(ChatTask.Shared.Enums.ConversationType.Group)
-            .HasValue<DirectMessage>(ChatTask.Shared.Enums.ConversationType.DirectMessage)
-            .HasValue<TaskGroup>(ChatTask.Shared.Enums.ConversationType.TaskGroup);
+            .HasDiscriminator<ConversationType>("Type")
+            .HasValue<Channel>(ConversationType.Channel)
+            .HasValue<Group>(ConversationType.Group)
+            .HasValue<DirectMessage>(ConversationType.DirectMessage)
+            .HasValue<TaskGroup>(ConversationType.TaskGroup);
 
-        // Conversation foreign key configuration
+        // Conversation foreign key configuration - Explicit navigation property ile
         modelBuilder.Entity<Conversation>()
-            .HasOne<Workspace>()
+            .HasOne(c => c.Workspace)
             .WithMany(w => w.Conversations)
             .HasForeignKey(c => c.WorkspaceId)
             .OnDelete(DeleteBehavior.NoAction);
@@ -79,10 +77,7 @@ public class ChatDbContext : DbContext
             entity.HasIndex(e => e.Id).IsUnique();
             entity.HasIndex(e => new { e.UserId, e.ParentId }).IsUnique();
             
-            entity.HasOne(e => e.User)
-                .WithMany(u => u.Members)
-                .HasForeignKey(e => e.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+            // User referansı yok - UserService'den DTO ile alınır
                 
             entity.HasOne(e => e.Workspace)
                 .WithMany(w => w.Members)
@@ -97,13 +92,5 @@ public class ChatDbContext : DbContext
                 .IsRequired(false);
         });
 
-        // User configuration
-        modelBuilder.Entity<User>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
-            entity.HasIndex(e => e.Email).IsUnique();
-        });
     }
 }

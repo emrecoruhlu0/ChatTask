@@ -1,5 +1,4 @@
 using ChatTask.Shared.Enums;
-using ChatTask.Shared.Models.Conversations;
 
 namespace ChatTask.Shared.DTOs;
 

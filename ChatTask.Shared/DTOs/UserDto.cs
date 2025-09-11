@@ -7,4 +7,7 @@ public class UserDto
 	public string Email { get; set; } = string.Empty;
 	public string Avatar { get; set; } = string.Empty;
 	public string Status { get; set; } = "offline";
+	public bool IsActive { get; set; } = true;
+	public DateTime CreatedAt { get; set; }
+	public DateTime UpdatedAt { get; set; }
 }

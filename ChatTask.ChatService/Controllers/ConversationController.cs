@@ -1,8 +1,7 @@
 ﻿using ChatTask.ChatService.Context;
 using ChatTask.ChatService.Hubs;
 using ChatTask.ChatService.Services;
-using ChatTask.Shared.Models;
-using ChatTask.Shared.Models.Conversations;
+using ChatTask.ChatService.Models;
 using ChatTask.Shared.DTOs;
 using ChatTask.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -20,6 +19,7 @@ public class ConversationController : ControllerBase
     private readonly ChatDbContext _context;
     private readonly IHubContext<ChatHub> _hubContext;
     private readonly IUserService _userService;
+    private readonly ChatMappingService _mappingService;
     
     // EntityType'a uygun ID oluşturma helper metodu
     private static Guid CreateEntityId(EntityType entityType)
@@ -27,15 +27,17 @@ public class ConversationController : ControllerBase
         var bytes = new byte[16];
         bytes[0] = (byte)entityType; // İlk byte = EntityType
         var random = new Random();
-        random.NextBytes(bytes, 1, 15); // Geri kalan 15 byte random
+        // NextBytes sadece 2 parametre alır: (byte[], int)
+        random.NextBytes(bytes.AsSpan(1, 15)); // Geri kalan 15 byte random
         return new Guid(bytes);
     }
 
-    public ConversationController(ChatDbContext context, IHubContext<ChatHub> hubContext, IUserService userService)
+    public ConversationController(ChatDbContext context, IHubContext<ChatHub> hubContext, IUserService userService, ChatMappingService mappingService)
     {
         _context = context;
         _hubContext = hubContext;
         _userService = userService;
+        _mappingService = mappingService;
     }
 
 
@@ -174,16 +176,7 @@ public class ConversationController : ControllerBase
                 });
             }
 
-            return Ok(new {
-                Id = workspace.Id,
-                Name = workspace.Name,
-                Description = workspace.Description,
-                Domain = workspace.Domain,
-                CreatedById = workspace.CreatedById,
-                IsActive = workspace.IsActive,
-                CreatedAt = workspace.CreatedAt,
-                MemberCount = workspace.Members.Count
-            });
+            return Ok(_mappingService.ToWorkspaceDto(workspace));
         }
         catch (DbUpdateException dbEx)
         {
@@ -240,7 +233,6 @@ public class ConversationController : ControllerBase
         {
             var workspaces = await _context.Workspaces
                 .Include(w => w.Members)
-                .ThenInclude(m => m.User)
                 .Include(w => w.Conversations)
                 .ToListAsync();
 
@@ -256,7 +248,7 @@ public class ConversationController : ControllerBase
                 ConversationCount = w.Conversations.Count
             }).ToList();
 
-            return Ok(workspaceDtos);
+            return Ok(_mappingService.ToWorkspaceDtoList(workspaces));
         }
         catch (Exception ex)
         {
@@ -358,7 +350,8 @@ public class ConversationController : ControllerBase
                 UserId = dto.UserId,
                 ParentId = workspaceId,
                 Role = role,
-                User = await _context.Users.FindAsync(dto.UserId)
+                JoinedAt = DateTime.UtcNow,
+                IsActive = true
             });
 
             await _context.SaveChangesAsync();
@@ -416,7 +409,6 @@ public class ConversationController : ControllerBase
             var query = _context.Conversations
                 .Where(c => c.WorkspaceId == workspaceId)
                 .Include(c => c.Members)
-                .ThenInclude(m => m.User)
                 .Include(c => c.Messages.OrderByDescending(m => m.CreatedAt).Take(1));
 
             // Type filtreleme - Type casting'i kaldÄ±rÄ±ldÄ±
@@ -448,15 +440,7 @@ public class ConversationController : ControllerBase
                 CreatedById = c.CreatedById,
                 DisplayName = c.GetDisplayName(),
                 MemberCount = c.Members.Count,
-                LastMessage = c.Messages.FirstOrDefault() != null ? new MessageDto
-                {
-                    Id = c.Messages.First().Id,
-                    ConversationId = c.Messages.First().ConversationId,
-                    SenderId = c.Messages.First().SenderId,
-                    Content = c.Messages.First().Content,
-                    CreatedAt = c.Messages.First().CreatedAt,
-                    IsRead = c.Messages.First().IsRead
-                } : null
+                LastMessage = c.Messages.FirstOrDefault()?.Content ?? "No messages"
             }).ToList();
 
             return Ok(conversationDtos);
@@ -501,7 +485,8 @@ public class ConversationController : ControllerBase
                     UserId = userId,
                     ParentId = channel.Id,
                     Role = userId == dto.CreatedById ? ChatTask.Shared.Enums.MemberRole.Owner : ChatTask.Shared.Enums.MemberRole.Member,
-                    User = await _context.Users.FindAsync(userId)
+                    JoinedAt = DateTime.UtcNow,
+                    IsActive = true
                 });
             }
 
@@ -549,7 +534,8 @@ public class ConversationController : ControllerBase
                     UserId = userId,
                     ParentId = group.Id,
                     Role = userId == dto.CreatedById ? ChatTask.Shared.Enums.MemberRole.Owner : ChatTask.Shared.Enums.MemberRole.Member,
-                    User = await _context.Users.FindAsync(userId)
+                    JoinedAt = DateTime.UtcNow,
+                    IsActive = true
                 });
             }
 
@@ -607,7 +593,8 @@ public class ConversationController : ControllerBase
                     UserId = participantId,
                     ParentId = directMessage.Id,
                     Role = ChatTask.Shared.Enums.MemberRole.Member,
-                    User = await _context.Users.FindAsync(participantId)
+                    JoinedAt = DateTime.UtcNow,
+                IsActive = true
                 });
             }
 
@@ -630,7 +617,6 @@ public class ConversationController : ControllerBase
         {
             var messages = await _context.Messages
                 .Where(m => m.ConversationId == conversationId)
-                .Include(m => m.Sender)
                 .OrderByDescending(m => m.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -645,7 +631,7 @@ public class ConversationController : ControllerBase
                 CreatedAt = m.CreatedAt,
                 IsRead = m.IsRead,
                 ThreadId = m.ThreadId,
-                SenderName = m.Sender.Name
+                SenderName = "User" // UserService'den alınacak
             }).ToList();
 
             return Ok(messageDtos);
@@ -736,7 +722,8 @@ public class ConversationController : ControllerBase
                 UserId = userId,
                 ParentId = conversation.Id,
                 Role = MemberRole.Member,
-                User = await _context.Users.FindAsync(userId)
+                JoinedAt = DateTime.UtcNow,
+                IsActive = true
             });
 
             await _context.SaveChangesAsync();

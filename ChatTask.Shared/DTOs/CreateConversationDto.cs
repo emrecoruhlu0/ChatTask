@@ -11,6 +11,7 @@ public class CreateConversationDto
     public List<Guid> MemberIds { get; set; } = new();
     public List<Guid> InitialMemberIds { get; set; } = new(); // Channel için
     public Guid CreatedById { get; set; }
+    public Guid WorkspaceId { get; set; }
     
     // Spesifik özellikler (opsiyonel)
     public string? Topic { get; set; }           // Channel için

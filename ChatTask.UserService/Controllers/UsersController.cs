@@ -1,6 +1,7 @@
 using ChatTask.Shared.DTOs;
 using ChatTask.UserService.Context;
 using ChatTask.UserService.Models;
+using ChatTask.UserService.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -13,10 +14,12 @@ namespace ChatTask.UserService.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly UserDbContext _context;
+    private readonly UserMappingService _mappingService;
 
-    public UsersController(UserDbContext context)
+    public UsersController(UserDbContext context, UserMappingService mappingService)
     {
         _context = context;
+        _mappingService = mappingService;
     }
 
     [HttpPost("register")]
@@ -115,17 +118,16 @@ public class UsersController : ControllerBase
             CreatePasswordHash(request.Password, out string hash, out string salt);
 
             // User oluştur
-            User user = new()
+            var registerDto = new RegisterDto
             {
                 Name = request.Name,
                 Email = request.Email,
                 Avatar = avatar,
-                Status = "offline",
                 PasswordHash = hash,
-                PasswordSalt = salt,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                PasswordSalt = salt
             };
+            
+            User user = _mappingService.ToModel(registerDto);
 
             await _context.AddAsync(user, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);

@@ -1,6 +1,5 @@
 using ChatTask.TaskService.Context;
-using ChatTask.Shared.Models;
-using ChatTask.Shared.Models.Conversations;
+using ChatTask.TaskService.Models;
 using ChatTask.Shared.DTOs;
 using ChatTask.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -59,8 +58,6 @@ public class TaskController : ControllerBase
     {
         var tasks = await _context.Tasks
             .Include(t => t.Assignments)
-            .ThenInclude(a => a.User)
-            .Include(t => t.TaskGroup)
             .ToListAsync(cancellationToken);
         
         return Ok(tasks);
@@ -71,8 +68,6 @@ public class TaskController : ControllerBase
     {
         var task = await _context.Tasks
             .Include(t => t.Assignments)
-            .ThenInclude(a => a.User)
-            .Include(t => t.TaskGroup)
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
             
         if (task == null)
@@ -132,8 +127,6 @@ public class TaskController : ControllerBase
     {
         var tasks = await _context.Tasks
             .Include(t => t.Assignments)
-            .ThenInclude(a => a.User)
-            .Include(t => t.TaskGroup)
             .Where(t => t.Assignments.Any(a => a.UserId == userId))
             .ToListAsync(cancellationToken);
             

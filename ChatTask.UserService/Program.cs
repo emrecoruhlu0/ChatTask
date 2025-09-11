@@ -1,4 +1,5 @@
 using ChatTask.UserService.Context;
+using ChatTask.UserService.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,9 @@ builder.Services.AddSwaggerGen();
 // Database
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Services
+builder.Services.AddScoped<UserMappingService>();
 
 // CORS
 builder.Services.AddCors(options =>

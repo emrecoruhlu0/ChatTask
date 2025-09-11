@@ -23,6 +23,9 @@ builder.Services.AddHttpClient<IUserService, UserService>(client =>
     client.BaseAddress = new Uri(userServiceUrl);
 });
 
+// Services
+builder.Services.AddScoped<ChatMappingService>();
+
 // SignalR
 builder.Services.AddSignalR();
 
