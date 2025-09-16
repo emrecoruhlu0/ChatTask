@@ -119,9 +119,9 @@ public class ChatMappingService
     {
         return new MemberDto
         {
-            Id = member.Id,
             UserId = member.UserId,
             ParentId = member.ParentId,
+            ParentType = member.ParentType,
             Role = member.Role,
             JoinedAt = member.JoinedAt,
             IsActive = member.IsActive
@@ -133,9 +133,9 @@ public class ChatMappingService
     {
         return new Member
         {
-            Id = Guid.NewGuid(),
             UserId = dto.UserId,
             ParentId = dto.ParentId,
+            ParentType = dto.ParentType,
             Role = dto.Role,
             JoinedAt = DateTime.UtcNow,
             IsActive = true

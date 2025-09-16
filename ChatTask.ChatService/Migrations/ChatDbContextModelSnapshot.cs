@@ -69,9 +69,14 @@ namespace ChatTask.ChatService.Migrations
 
             modelBuilder.Entity("ChatTask.ChatService.Models.Member", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ParentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ParentType")
+                        .HasColumnType("int");
 
                     b.Property<Guid?>("ConversationId")
                         .HasColumnType("uniqueidentifier");
@@ -82,26 +87,20 @@ namespace ChatTask.ChatService.Migrations
                     b.Property<DateTime>("JoinedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("ParentId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
+                    b.HasKey("UserId", "ParentId", "ParentType");
 
                     b.HasIndex("ConversationId");
 
-                    b.HasIndex("Id")
-                        .IsUnique();
-
                     b.HasIndex("ParentId");
 
-                    b.HasIndex("UserId", "ParentId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("ParentId", "ParentType");
+
+                    b.HasIndex("UserId", "ParentType");
 
                     b.ToTable("Members");
                 });
@@ -189,22 +188,12 @@ namespace ChatTask.ChatService.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("WorkspaceId1")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasIndex("WorkspaceId1");
-
                     b.HasDiscriminator().HasValue(1);
                 });
 
             modelBuilder.Entity("ChatTask.ChatService.Models.DirectMessage", b =>
                 {
                     b.HasBaseType("ChatTask.ChatService.Models.Conversation");
-
-                    b.Property<Guid>("WorkspaceId2")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasIndex("WorkspaceId2");
 
                     b.HasDiscriminator().HasValue(3);
                 });
@@ -219,18 +208,10 @@ namespace ChatTask.ChatService.Migrations
                     b.Property<int>("Purpose")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("WorkspaceId2")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasIndex("WorkspaceId2");
-
                     b.ToTable("Conversations", t =>
                         {
                             t.Property("Purpose")
                                 .HasColumnName("Group_Purpose");
-
-                            t.Property("WorkspaceId2")
-                                .HasColumnName("Group_WorkspaceId2");
                         });
 
                     b.HasDiscriminator().HasValue(2);
@@ -245,17 +226,6 @@ namespace ChatTask.ChatService.Migrations
 
                     b.Property<int>("TaskCount")
                         .HasColumnType("int");
-
-                    b.Property<Guid>("WorkspaceId2")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasIndex("WorkspaceId2");
-
-                    b.ToTable("Conversations", t =>
-                        {
-                            t.Property("WorkspaceId2")
-                                .HasColumnName("TaskGroup_WorkspaceId2");
-                        });
 
                     b.HasDiscriminator().HasValue(4);
                 });
@@ -274,22 +244,8 @@ namespace ChatTask.ChatService.Migrations
             modelBuilder.Entity("ChatTask.ChatService.Models.Member", b =>
                 {
                     b.HasOne("ChatTask.ChatService.Models.Conversation", null)
-                        .WithMany("ConversationMembers")
+                        .WithMany("Members")
                         .HasForeignKey("ConversationId");
-
-                    b.HasOne("ChatTask.ChatService.Models.Conversation", "Conversation")
-                        .WithMany("Members")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("ChatTask.ChatService.Models.Workspace", "Workspace")
-                        .WithMany("Members")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Conversation");
-
-                    b.Navigation("Workspace");
                 });
 
             modelBuilder.Entity("ChatTask.ChatService.Models.Message", b =>
@@ -303,44 +259,8 @@ namespace ChatTask.ChatService.Migrations
                     b.Navigation("Conversation");
                 });
 
-            modelBuilder.Entity("ChatTask.ChatService.Models.Channel", b =>
-                {
-                    b.HasOne("ChatTask.ChatService.Models.Workspace", null)
-                        .WithMany("Channels")
-                        .HasForeignKey("WorkspaceId1");
-                });
-
-            modelBuilder.Entity("ChatTask.ChatService.Models.DirectMessage", b =>
-                {
-                    b.HasOne("ChatTask.ChatService.Models.Workspace", null)
-                        .WithMany("DirectMessages")
-                        .HasForeignKey("WorkspaceId2")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ChatTask.ChatService.Models.Group", b =>
-                {
-                    b.HasOne("ChatTask.ChatService.Models.Workspace", null)
-                        .WithMany("Groups")
-                        .HasForeignKey("WorkspaceId2")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ChatTask.ChatService.Models.TaskGroup", b =>
-                {
-                    b.HasOne("ChatTask.ChatService.Models.Workspace", null)
-                        .WithMany("TaskGroups")
-                        .HasForeignKey("WorkspaceId2")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("ChatTask.ChatService.Models.Conversation", b =>
                 {
-                    b.Navigation("ConversationMembers");
-
                     b.Navigation("Members");
 
                     b.Navigation("Messages");
@@ -348,17 +268,7 @@ namespace ChatTask.ChatService.Migrations
 
             modelBuilder.Entity("ChatTask.ChatService.Models.Workspace", b =>
                 {
-                    b.Navigation("Channels");
-
                     b.Navigation("Conversations");
-
-                    b.Navigation("DirectMessages");
-
-                    b.Navigation("Groups");
-
-                    b.Navigation("Members");
-
-                    b.Navigation("TaskGroups");
                 });
 #pragma warning restore 612, 618
         }

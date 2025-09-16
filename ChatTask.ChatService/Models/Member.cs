@@ -1,29 +1,25 @@
 using ChatTask.Shared.Enums;
-using ChatTask.Shared.Helpers;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChatTask.ChatService.Models;
 
 public class Member
 {
-    // ID harmanlama: UserId + ParentId + Role
-    public Guid Id { get; set; }  // Harmanlanmış ID
+    // Composite Key: UserId + ParentId + ParentType
+    public Guid UserId { get; set; }
+    public Guid ParentId { get; set; }
+    public ParentType ParentType { get; set; }
     public MemberRole Role { get; set; }
     public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
     
-    // Foreign key properties (EF Core için)
-    public Guid UserId { get; set; }
-    public Guid ParentId { get; set; }
-    
-    // Navigation properties
+    // Navigation properties (NotMapped - explicit FK yok)
+    [NotMapped]
     public Workspace? Workspace { get; set; }
+    [NotMapped]
     public Conversation? Conversation { get; set; }
     
-    // ID'den bilgi çıkarma metodları
-    public Guid GetUserId() => MemberIdHelper.ExtractUserId(Id);
-    public Guid GetParentId() => MemberIdHelper.ExtractParentId(Id);
-    
-    // Helper properties - EntityType kontrolü kaldırıldı
-    public bool IsWorkspaceMember => Workspace != null;
-    public bool IsConversationMember => Conversation != null;
+    // Helper properties
+    public bool IsWorkspaceMember => ParentType == ParentType.Workspace;
+    public bool IsConversationMember => ParentType == ParentType.Conversation;
 }

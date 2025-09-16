@@ -11,7 +11,7 @@ public class Channel : Conversation
     public override bool CanUserJoin(Guid userId)
     {
         // Channel'a workspace üyesi herkes katılabilir (private değilse)
-        return !IsPrivate || Members.Any(m => m.GetUserId() == userId);
+        return !IsPrivate || Members.Any(m => m.UserId == userId);
     }
     
     public override string GetDisplayName()

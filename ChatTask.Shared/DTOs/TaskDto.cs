@@ -14,4 +14,5 @@ public class TaskDto
     public DateTime DueDate { get; set; }
     public Guid? TaskGroupId { get; set; }
     public int AssignmentCount { get; set; }
+    public List<TaskAssignmentDto> Assignments { get; set; } = new();
 }

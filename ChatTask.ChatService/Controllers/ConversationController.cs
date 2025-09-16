@@ -21,16 +21,7 @@ public class ConversationController : ControllerBase
     private readonly IUserService _userService;
     private readonly ChatMappingService _mappingService;
     
-    // EntityType'a uygun ID oluşturma helper metodu
-    private static Guid CreateEntityId(EntityType entityType)
-    {
-        var bytes = new byte[16];
-        bytes[0] = (byte)entityType; // İlk byte = EntityType
-        var random = new Random();
-        // NextBytes sadece 2 parametre alır: (byte[], int)
-        random.NextBytes(bytes.AsSpan(1, 15)); // Geri kalan 15 byte random
-        return new Guid(bytes);
-    }
+    // Standart GUID oluşturma - EntityType bilgisi artık ParentType ile saklanıyor
 
     public ConversationController(ChatDbContext context, IHubContext<ChatHub> hubContext, IUserService userService, ChatMappingService mappingService)
     {
@@ -63,9 +54,13 @@ public class ConversationController : ControllerBase
     {
         try
         {
+            Console.WriteLine($"=== WORKSPACE CREATION STARTED ===");
+            Console.WriteLine($"Request DTO: Name='{dto.Name}', CreatedById='{dto.CreatedById}', Description='{dto.Description}'");
+
             // Input validation
             if (string.IsNullOrWhiteSpace(dto.Name))
             {
+                Console.WriteLine("ERROR: Workspace name is empty");
                 return BadRequest(new { 
                     Message = "Workspace adı boş olamaz", 
                     Code = "INVALID_WORKSPACE_NAME",
@@ -76,6 +71,7 @@ public class ConversationController : ControllerBase
 
             if (dto.CreatedById == Guid.Empty)
             {
+                Console.WriteLine("ERROR: CreatedById is empty GUID");
                 return BadRequest(new { 
                     Message = "Geçerli bir kullanıcı ID'si gerekli", 
                     Code = "INVALID_USER_ID",
@@ -84,10 +80,29 @@ public class ConversationController : ControllerBase
                 });
             }
 
+            Console.WriteLine("Input validation passed");
+
             // User'ın var olup olmadığını kontrol et (UserService'ten)
-            var userExists = await _userService.UserExistsAsync(dto.CreatedById);
+            Console.WriteLine("Checking if user exists...");
+            bool userExists;
+            try
+            {
+                userExists = await _userService.UserExistsAsync(dto.CreatedById);
+                Console.WriteLine($"User exists check result: {userExists}");
+            }
+            catch (Exception userCheckEx)
+            {
+                Console.WriteLine($"ERROR: User existence check failed: {userCheckEx.Message}");
+                return StatusCode(500, new { 
+                    Message = "Kullanıcı kontrolü sırasında hata oluştu", 
+                    Code = "USER_CHECK_ERROR",
+                    Error = userCheckEx.Message
+                });
+            }
+
             if (!userExists)
             {
+                Console.WriteLine("ERROR: User not found");
                 return BadRequest(new { 
                     Message = "Belirtilen kullanıcı bulunamadı", 
                     Code = "USER_NOT_FOUND",
@@ -96,86 +111,164 @@ public class ConversationController : ControllerBase
                 });
             }
 
+            Console.WriteLine("User validation passed");
+
             // Domain oluştur (Name'den)
-            var domain = dto.Name.ToLowerInvariant()
-                .Replace(" ", "-")
-                .Replace("ğ", "g")
-                .Replace("ü", "u")
-                .Replace("ş", "s")
-                .Replace("ı", "i")
-                .Replace("ö", "o")
-                .Replace("ç", "c")
-                + "-" + Guid.NewGuid().ToString("N")[..8];
-
-            var workspace = new Workspace
+            Console.WriteLine("Creating domain...");
+            string domain;
+            try
             {
-                Id = CreateEntityId(EntityType.Workspace), // EntityType'a uygun ID oluştur
-                Name = dto.Name,
-                Description = dto.Description,
-                Domain = domain,
-                CreatedById = dto.CreatedById,
-                IsActive = true
-            };
+                domain = dto.Name.ToLowerInvariant()
+                    .Replace(" ", "-")
+                    .Replace("ğ", "g")
+                    .Replace("ü", "u")
+                    .Replace("ş", "s")
+                    .Replace("ı", "i")
+                    .Replace("ö", "o")
+                    .Replace("ç", "c")
+                    + "-" + Guid.NewGuid().ToString("N")[..8];
+                Console.WriteLine($"Domain created: {domain}");
+            }
+            catch (Exception domainEx)
+            {
+                Console.WriteLine($"ERROR: Domain creation failed: {domainEx.Message}");
+                return StatusCode(500, new { 
+                    Message = "Domain oluşturulurken hata oluştu", 
+                    Code = "DOMAIN_CREATION_ERROR",
+                    Error = domainEx.Message
+                });
+            }
 
-            await _context.Workspaces.AddAsync(workspace);
-            await _context.SaveChangesAsync();
+            // Workspace object oluştur
+            Console.WriteLine("Creating workspace object...");
+            Workspace workspace;
+            try
+            {
+                workspace = new Workspace
+                {
+                    Id = Guid.NewGuid(), // Standart GUID oluştur
+                    Name = dto.Name,
+                    Description = dto.Description,
+                    Domain = domain,
+                    CreatedById = dto.CreatedById,
+                    IsActive = true
+                };
+                Console.WriteLine($"Workspace object created: Id={workspace.Id}, Name={workspace.Name}");
+            }
+            catch (Exception workspaceObjEx)
+            {
+                Console.WriteLine($"ERROR: Workspace object creation failed: {workspaceObjEx.Message}");
+                return StatusCode(500, new { 
+                    Message = "Workspace nesnesi oluşturulurken hata oluştu", 
+                    Code = "WORKSPACE_OBJECT_ERROR",
+                    Error = workspaceObjEx.Message
+                });
+            }
+
+            // Workspace'i veritabanına kaydet
+            Console.WriteLine("Saving workspace to database...");
+            try
+            {
+                await _context.Workspaces.AddAsync(workspace);
+                Console.WriteLine("Workspace added to context");
+                
+                await _context.SaveChangesAsync();
+                Console.WriteLine("Workspace saved to database successfully");
+            }
+            catch (Exception workspaceSaveEx)
+            {
+                Console.WriteLine($"ERROR: Workspace save failed: {workspaceSaveEx.Message}");
+                Console.WriteLine($"Workspace save stack trace: {workspaceSaveEx.StackTrace}");
+                if (workspaceSaveEx.InnerException != null)
+                {
+                    Console.WriteLine($"Workspace save inner exception: {workspaceSaveEx.InnerException.Message}");
+                }
+                return StatusCode(500, new { 
+                    Message = "Workspace kaydedilirken hata oluştu", 
+                    Code = "WORKSPACE_SAVE_ERROR",
+                    Error = workspaceSaveEx.Message,
+                    InnerError = workspaceSaveEx.InnerException?.Message
+                });
+            }
 
             // Creator'ı workspace'e owner olarak ekle
+            Console.WriteLine("Creating member for workspace owner...");
             try
             {
                 Console.WriteLine($"Creating Member for UserId: {dto.CreatedById}, WorkspaceId: {workspace.Id}");
                 
-                var memberId = ChatTask.Shared.Helpers.MemberIdHelper.CreateMemberId(
-                    dto.CreatedById, 
-                    workspace.Id, 
-                    ChatTask.Shared.Enums.MemberRole.Owner
-                );
-                
-                Console.WriteLine($"Generated MemberId: {memberId}");
-                
-                var member = new Member
+                Member member;
+                try
                 {
-                    Id = memberId,
-                    UserId = dto.CreatedById,
-                    ParentId = workspace.Id,
-                    Role = ChatTask.Shared.Enums.MemberRole.Owner,
-                    JoinedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                    member = new Member
+                    {
+                        UserId = dto.CreatedById,
+                        ParentId = workspace.Id,
+                        ParentType = ChatTask.Shared.Enums.ParentType.Workspace,
+                        Role = ChatTask.Shared.Enums.MemberRole.Owner,
+                        JoinedAt = DateTime.UtcNow,
+                        IsActive = true
+                    };
+                    Console.WriteLine($"Member object created: UserId={member.UserId}, ParentId={member.ParentId}, ParentType={member.ParentType}, Role={member.Role}");
+                }
+                catch (Exception memberObjEx)
+                {
+                    Console.WriteLine($"ERROR: Member object creation failed: {memberObjEx.Message}");
+                    return StatusCode(500, new { 
+                        Message = "Member nesnesi oluşturulurken hata oluştu", 
+                        Code = "MEMBER_OBJECT_ERROR",
+                        Error = memberObjEx.Message
+                    });
+                }
 
-                Console.WriteLine($"Member object created: Id={member.Id}, UserId={member.UserId}, ParentId={member.ParentId}, Role={member.Role}");
-
-                // Member'ı doğrudan database'e ekle
-                await _context.Members.AddAsync(member);
-                Console.WriteLine("Member added to context");
-                
-                await _context.SaveChangesAsync();
-                Console.WriteLine("Member saved to database successfully");
+                // Member'ı veritabanına ekle
+                try
+                {
+                    await _context.Members.AddAsync(member);
+                    Console.WriteLine("Member added to context");
+                    
+                    await _context.SaveChangesAsync();
+                    Console.WriteLine("Member saved to database successfully");
+                }
+                catch (Exception memberSaveEx)
+                {
+                    Console.WriteLine($"ERROR: Member save failed: {memberSaveEx.Message}");
+                    Console.WriteLine($"Member save stack trace: {memberSaveEx.StackTrace}");
+                    if (memberSaveEx.InnerException != null)
+                    {
+                        Console.WriteLine($"Member save inner exception: {memberSaveEx.InnerException.Message}");
+                    }
+                    
+                    return StatusCode(500, new { 
+                        Message = "Member kaydedilirken hata oluştu", 
+                        Code = "MEMBER_SAVE_ERROR",
+                        Error = memberSaveEx.Message,
+                        InnerError = memberSaveEx.InnerException?.Message
+                    });
+                }
             }
             catch (Exception memberEx)
             {
-                // Console log - geliştirici için detaylı debug
-                Console.WriteLine($"Member creation error: {memberEx.Message}");
+                // Genel member oluşturma hatası
+                Console.WriteLine($"ERROR: General member creation error: {memberEx.Message}");
                 Console.WriteLine($"Member creation stack trace: {memberEx.StackTrace}");
                 if (memberEx.InnerException != null)
                 {
                     Console.WriteLine($"Member creation inner exception: {memberEx.InnerException.Message}");
                 }
                 
-                // Return response - kullanıcı için güvenli hata mesajı
                 return StatusCode(500, new { 
                     Message = "Workspace oluşturuldu ama üye eklenirken hata oluştu", 
                     Code = "MEMBER_CREATION_ERROR",
                     Field = "member",
                     Suggestion = "Lütfen daha sonra tekrar deneyin",
                     Timestamp = DateTime.UtcNow,
-                    // Sadece development ortamında detaylı hata göster
-                    Error = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" 
-                        ? memberEx.Message 
-                        : "Üye ekleme işlemi başarısız"
+                    Error = memberEx.Message,
+                    InnerError = memberEx.InnerException?.Message
                 });
             }
 
+            Console.WriteLine("=== WORKSPACE CREATION COMPLETED SUCCESSFULLY ===");
             return Ok(_mappingService.ToWorkspaceDto(workspace));
         }
         catch (DbUpdateException dbEx)
@@ -269,9 +362,9 @@ public class ConversationController : ControllerBase
                 return NotFound("Workspace bulunamadı");
 
             // Sadece owner güncelleyebilir
-            var isOwner = workspace.Members.Any(m => m.GetUserId() == dto.UpdatedById && m.Role == ChatTask.Shared.Enums.MemberRole.Owner);
+            var isOwner = workspace.Members.Any(m => m.UserId == dto.UpdatedById && m.Role == ChatTask.Shared.Enums.MemberRole.Owner);
             if (!isOwner)
-                return Forbid("Workspace'i güncelleme yetkiniz yok");
+                return BadRequest("Workspace'i güncelleme yetkiniz yok");
 
             workspace.Name = dto.Name ?? workspace.Name;
             workspace.Description = dto.Description ?? workspace.Description;
@@ -299,9 +392,9 @@ public class ConversationController : ControllerBase
                 return NotFound("Workspace bulunamadı");
 
             // Sadece owner silebilir
-            var isOwner = workspace.Members.Any(m => m.GetUserId() == deletedById && m.Role == ChatTask.Shared.Enums.MemberRole.Owner);
+            var isOwner = workspace.Members.Any(m => m.UserId == deletedById && m.Role == ChatTask.Shared.Enums.MemberRole.Owner);
             if (!isOwner)
-                return Forbid("Workspace'i silme yetkiniz yok");
+                return BadRequest("Workspace'i silme yetkiniz yok");
 
             _context.Workspaces.Remove(workspace);
             await _context.SaveChangesAsync();
@@ -319,36 +412,53 @@ public class ConversationController : ControllerBase
     {
         try
         {
+            Console.WriteLine($"=== ADD WORKSPACE MEMBER STARTED ===");
+            Console.WriteLine($"WorkspaceId: {workspaceId}");
+            Console.WriteLine($"DTO: UserId={dto.UserId}, AddedById={dto.AddedById}, Role={dto.Role}");
+
             var workspace = await _context.Workspaces
                 .Include(w => w.Members)
                 .FirstOrDefaultAsync(w => w.Id == workspaceId);
 
             if (workspace == null)
+            {
+                Console.WriteLine("ERROR: Workspace not found");
                 return NotFound("Workspace bulunamadı");
+            }
+
+            Console.WriteLine($"Workspace found: {workspace.Name}");
+            Console.WriteLine($"Workspace members count: {workspace.Members.Count}");
+            foreach (var member in workspace.Members)
+            {
+                Console.WriteLine($"Member: UserId={member.UserId}, Role={member.Role}");
+            }
 
             // Sadece owner veya admin üye ekleyebilir
-            var canAddMember = workspace.Members.Any(m => m.GetUserId() == dto.AddedById && 
+            var canAddMember = workspace.Members.Any(m => m.UserId == dto.AddedById && 
                 (m.Role == ChatTask.Shared.Enums.MemberRole.Owner || m.Role == ChatTask.Shared.Enums.MemberRole.Admin));
             
+            Console.WriteLine($"Can add member: {canAddMember}");
+            
             if (!canAddMember)
-                return Forbid("Workspace'e üye ekleme yetkiniz yok");
+            {
+                Console.WriteLine("ERROR: User does not have permission to add members");
+                return BadRequest(new { 
+                    Message = "Workspace'e üye ekleme yetkiniz yok", 
+                    Code = "NO_PERMISSION",
+                    Details = $"AddedById: {dto.AddedById}, WorkspaceId: {workspaceId}"
+                });
+            }
 
-            if (workspace.Members.Any(m => m.GetUserId() == dto.UserId))
+            if (workspace.Members.Any(m => m.UserId == dto.UserId))
                 return BadRequest("Kullanıcı zaten workspace'e üye");
 
             var role = dto.Role != MemberRole.Member ? dto.Role : MemberRole.Member;
             
-            var memberId = ChatTask.Shared.Helpers.MemberIdHelper.CreateMemberId(
-                dto.UserId, 
-                workspaceId, 
-                role
-            );
-            
             workspace.Members.Add(new Member
             {
-                Id = memberId,
                 UserId = dto.UserId,
                 ParentId = workspaceId,
+                ParentType = ChatTask.Shared.Enums.ParentType.Workspace,
                 Role = role,
                 JoinedAt = DateTime.UtcNow,
                 IsActive = true
@@ -376,13 +486,13 @@ public class ConversationController : ControllerBase
                 return NotFound("Workspace bulunamadı");
 
             // Sadece owner veya admin üye çıkarabilir
-            var canRemoveMember = workspace.Members.Any(m => m.GetUserId() == removedById && 
+            var canRemoveMember = workspace.Members.Any(m => m.UserId == removedById && 
                 (m.Role == ChatTask.Shared.Enums.MemberRole.Owner || m.Role == ChatTask.Shared.Enums.MemberRole.Admin));
             
             if (!canRemoveMember)
-                return Forbid("Workspace'den üye çıkarma yetkiniz yok");
+                return BadRequest("Workspace'den üye çıkarma yetkiniz yok");
 
-            var member = workspace.Members.FirstOrDefault(m => m.GetUserId() == userId);
+            var member = workspace.Members.FirstOrDefault(m => m.UserId == userId);
             if (member == null)
                 return NotFound("Üye bulunamadı");
 
@@ -406,48 +516,49 @@ public class ConversationController : ControllerBase
     {
         try
         {
-            var query = _context.Conversations
-                .Where(c => c.WorkspaceId == workspaceId)
-                .Include(c => c.Members)
-                .Include(c => c.Messages.OrderByDescending(m => m.CreatedAt).Take(1));
+            var baseQuery = _context.Conversations
+                .AsNoTracking()
+                .Where(c => c.WorkspaceId == workspaceId);
 
-            // Type filtreleme - Type casting'i kaldÄ±rÄ±ldÄ±
-            if (!string.IsNullOrEmpty(type))
+            if (!string.IsNullOrWhiteSpace(type))
             {
-                // Type filtreleme ÅŸimdilik devre dÄ±ÅŸÄ±
-                // query = type.ToLower() switch
-                // {
-                //     "channel" => query.OfType<Channel>(),
-                //     "group" => query.OfType<Group>(),
-                //     "direct" => query.OfType<DirectMessage>(),
-                //     "task" => query.OfType<TaskGroup>(),
-                //     _ => query
-                // };
+                var lowered = type.ToLowerInvariant();
+                baseQuery = lowered switch
+                {
+                    "channel" => baseQuery.OfType<Channel>(),
+                    "group" => baseQuery.OfType<Group>(),
+                    "dm" or "direct" or "directmessage" => baseQuery.OfType<DirectMessage>(),
+                    "task" or "taskgroup" => baseQuery.OfType<TaskGroup>(),
+                    _ => baseQuery
+                };
             }
 
-            var conversations = await query.ToListAsync();
-
-            var conversationDtos = conversations.Select(c => new ConversationDto
-            {
-                Id = c.Id,
-                WorkspaceId = c.WorkspaceId,
-                Name = c.Name,
-                Description = c.Description,
-                Type = c.Type,
-                IsPrivate = c.IsPrivate,
-                IsArchived = c.IsArchived,
-                CreatedAt = c.CreatedAt,
-                CreatedById = c.CreatedById,
-                DisplayName = c.GetDisplayName(),
-                MemberCount = c.Members.Count,
-                LastMessage = c.Messages.FirstOrDefault()?.Content ?? "No messages"
-            }).ToList();
+            var conversationDtos = await baseQuery
+                .Select(c => new ConversationDto
+                {
+                    Id = c.Id,
+                    WorkspaceId = c.WorkspaceId,
+                    Name = c.Name,
+                    Description = c.Description,
+                    Type = c.Type,
+                    IsPrivate = c.IsPrivate,
+                    IsArchived = c.IsArchived,
+                    CreatedAt = c.CreatedAt,
+                    CreatedById = c.CreatedById,
+                    DisplayName = c.Name,
+                    MemberCount = c.Members.Count,
+                    LastMessage = c.Messages
+                        .OrderByDescending(m => m.CreatedAt)
+                        .Select(m => m.Content)
+                        .FirstOrDefault() ?? "No messages"
+                })
+                .ToListAsync();
 
             return Ok(conversationDtos);
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Conversation'lar alÄ±nÄ±rken hata oluÅŸtu", Error = ex.Message });
+            return StatusCode(500, new { Message = "Conversation'lar alınırken hata oluştu", Error = ex.Message });
         }
     }
 
@@ -457,6 +568,18 @@ public class ConversationController : ControllerBase
     {
         try
         {
+            Console.WriteLine($"[CreateChannel] Starting - WorkspaceId: {workspaceId}, Name: {dto.Name}, CreatedById: {dto.CreatedById}");
+            Console.WriteLine($"[CreateChannel] InitialMemberIds: {string.Join(", ", dto.InitialMemberIds)}");
+
+            // Workspace var mı kontrol et
+            var workspace = await _context.Workspaces.FindAsync(workspaceId);
+            if (workspace == null)
+            {
+                Console.WriteLine($"[CreateChannel] ERROR: Workspace not found: {workspaceId}");
+                return NotFound(new { Message = "Workspace bulunamadı" });
+            }
+            Console.WriteLine($"[CreateChannel] Workspace found: {workspace.Name}");
+
             var channel = new Channel
             {
                 WorkspaceId = workspaceId,
@@ -469,35 +592,68 @@ public class ConversationController : ControllerBase
                 CreatedById = dto.CreatedById,
                 Type = ChatTask.Shared.Enums.ConversationType.Channel
             };
+            Console.WriteLine($"[CreateChannel] Channel object created: {channel.Name}");
 
-            // Üyeleri ekle
+            // Önce Channel'ı kaydet (ID oluşsun)
+            Console.WriteLine($"[CreateChannel] Adding channel to context");
+            await _context.Channels.AddAsync(channel);
+            await _context.SaveChangesAsync();
+            Console.WriteLine($"[CreateChannel] Channel saved with ID: {channel.Id}");
+
+            // Şimdi üyeleri ekle (Channel'a özel member'lar)
+            Console.WriteLine($"[CreateChannel] Adding {dto.InitialMemberIds.Count} members to channel");
             foreach (var userId in dto.InitialMemberIds)
             {
-                var memberId = ChatTask.Shared.Helpers.MemberIdHelper.CreateMemberId(
-                    userId, 
-                    channel.Id, 
-                    userId == dto.CreatedById ? ChatTask.Shared.Enums.MemberRole.Owner : ChatTask.Shared.Enums.MemberRole.Member
-                );
-                
-                channel.Members.Add(new Member
+                // Channel member'ı oluştur (Conversation'a bağlı)
+                var member = new Member
                 {
-                    Id = memberId,
                     UserId = userId,
-                    ParentId = channel.Id,
+                    ParentId = channel.Id, // Artık ID var
+                    ParentType = ChatTask.Shared.Enums.ParentType.Conversation,
                     Role = userId == dto.CreatedById ? ChatTask.Shared.Enums.MemberRole.Owner : ChatTask.Shared.Enums.MemberRole.Member,
                     JoinedAt = DateTime.UtcNow,
                     IsActive = true
-                });
+                };
+                Console.WriteLine($"[CreateChannel] Adding channel member: UserId={userId}, ParentId={channel.Id}, Role={member.Role}");
+                await _context.Members.AddAsync(member);
             }
-
-            await _context.Channels.AddAsync(channel);
+            
+            Console.WriteLine($"[CreateChannel] Saving member changes to database");
             await _context.SaveChangesAsync();
+            Console.WriteLine($"[CreateChannel] Channel created successfully: {channel.Id}");
 
-            return Ok(channel);
+            // JSON cycle'ı önlemek için sadece gerekli alanları döndür
+            var response = new
+            {
+                Id = channel.Id,
+                Name = channel.Name,
+                Description = channel.Description,
+                Topic = channel.Topic,
+                Purpose = channel.Purpose,
+                IsPrivate = channel.IsPrivate,
+                AutoAddNewMembers = channel.AutoAddNewMembers,
+                CreatedById = channel.CreatedById,
+                Type = channel.Type,
+                WorkspaceId = channel.WorkspaceId,
+                CreatedAt = channel.CreatedAt,
+                MemberCount = channel.Members.Count
+            };
+            
+            return Ok(response);
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Channel oluÅŸturulurken hata oluÅŸtu", Error = ex.Message });
+            Console.WriteLine($"[CreateChannel] ERROR: {ex.Message}");
+            Console.WriteLine($"[CreateChannel] Stack trace: {ex.StackTrace}");
+            if (ex.InnerException != null)
+            {
+                Console.WriteLine($"[CreateChannel] Inner exception: {ex.InnerException.Message}");
+            }
+            return StatusCode(500, new { 
+                Message = "Channel oluşturulurken hata oluştu", 
+                Error = ex.Message,
+                InnerError = ex.InnerException?.Message
+            });
         }
     }
 
@@ -519,20 +675,14 @@ public class ConversationController : ControllerBase
                 Type = ChatTask.Shared.Enums.ConversationType.Group
             };
 
-            // Üyeleri ekle
+            // Üyeleri ekle (Workspace FK ile bağla; Conversation bağı navigation ile kurulur)
             foreach (var userId in dto.MemberIds)
             {
-                var memberId = ChatTask.Shared.Helpers.MemberIdHelper.CreateMemberId(
-                    userId, 
-                    group.Id, 
-                    userId == dto.CreatedById ? ChatTask.Shared.Enums.MemberRole.Owner : ChatTask.Shared.Enums.MemberRole.Member
-                );
-                
                 group.Members.Add(new Member
                 {
-                    Id = memberId,
                     UserId = userId,
-                    ParentId = group.Id,
+                    ParentId = workspaceId,
+                    ParentType = ChatTask.Shared.Enums.ParentType.Workspace,
                     Role = userId == dto.CreatedById ? ChatTask.Shared.Enums.MemberRole.Owner : ChatTask.Shared.Enums.MemberRole.Member,
                     JoinedAt = DateTime.UtcNow,
                     IsActive = true
@@ -552,18 +702,18 @@ public class ConversationController : ControllerBase
 
     // YENÄ°: Direct message oluÅŸtur
     [HttpPost("workspaces/{workspaceId:guid}/direct-messages")]
-    public async Task<IActionResult> CreateDirectMessage(Guid workspaceId, [FromBody] List<Guid> participantIds)
+    public async Task<IActionResult> CreateDirectMessage(Guid workspaceId, [FromBody] CreateDirectMessageDto dto)
     {
         try
         {
-            if (participantIds.Count != 2)
+            if (dto.ParticipantIds.Count != 2)
                 return BadRequest("Direct message sadece 2 kiÅŸi arasÄ±nda olabilir");
 
             // Zaten var olan DM kontrolü
             var existingDM = await _context.DirectMessages
                 .Where(dm => dm.WorkspaceId == workspaceId)
                 .Where(dm => dm.Members.Count == 2 &&
-                           dm.Members.All(m => participantIds.Contains(m.GetUserId())))
+                           dm.Members.All(m => dto.ParticipantIds.Contains(m.UserId)))
                 .FirstOrDefaultAsync();
 
             if (existingDM != null)
@@ -572,33 +722,32 @@ public class ConversationController : ControllerBase
             var directMessage = new DirectMessage
             {
                 WorkspaceId = workspaceId,
-                Name = "Direct Message",
-                CreatedById = participantIds.First(),
+                Name = dto.Name ?? "Direct Message",
+                Description = dto.Description,
+                CreatedById = dto.ParticipantIds.First(),
                 Type = ChatTask.Shared.Enums.ConversationType.DirectMessage,
-                IsPrivate = true
+                IsPrivate = dto.IsPrivate
             };
 
-            // Katılımcıları ekle
-            foreach (var participantId in participantIds)
+            // Önce DirectMessage'ı kaydet (ID oluşsun)
+            await _context.DirectMessages.AddAsync(directMessage);
+            await _context.SaveChangesAsync();
+
+            // Şimdi katılımcıları ekle (Direct Message'a özel member'lar)
+            foreach (var participantId in dto.ParticipantIds)
             {
-                var memberId = ChatTask.Shared.Helpers.MemberIdHelper.CreateMemberId(
-                    participantId, 
-                    directMessage.Id, 
-                    ChatTask.Shared.Enums.MemberRole.Member
-                );
-                
-                directMessage.Members.Add(new Member
+                var member = new Member
                 {
-                    Id = memberId,
                     UserId = participantId,
-                    ParentId = directMessage.Id,
+                    ParentId = directMessage.Id, // Artık ID var
+                    ParentType = ChatTask.Shared.Enums.ParentType.Conversation,
                     Role = ChatTask.Shared.Enums.MemberRole.Member,
                     JoinedAt = DateTime.UtcNow,
-                IsActive = true
-                });
+                    IsActive = true
+                };
+                await _context.Members.AddAsync(member);
             }
 
-            await _context.DirectMessages.AddAsync(directMessage);
             await _context.SaveChangesAsync();
 
             return Ok(directMessage);
@@ -649,6 +798,7 @@ public class ConversationController : ControllerBase
         try
         {
             // Conversation kontrolÃ¼
+            // Conversation kontrolü
             var conversation = await _context.Conversations
                 .Include(c => c.Members)
                 .FirstOrDefaultAsync(c => c.Id == request.ConversationId);
@@ -657,8 +807,38 @@ public class ConversationController : ControllerBase
                 return NotFound("Conversation bulunamadÄ±");
 
             // Kullanıcının conversation'a üye olup olmadığını kontrol et
-            if (!conversation.Members.Any(m => m.GetUserId() == request.SenderId))
-                return Forbid("Bu conversation'a mesaj gönderme yetkiniz yok");
+            bool isMember = false;
+            
+            if (conversation.Type == ChatTask.Shared.Enums.ConversationType.DirectMessage)
+            {
+                // Direct Message için: Sadece conversation member'ı kontrol et
+                var dmMember = await _context.Members
+                    .FirstOrDefaultAsync(m => m.UserId == request.SenderId && 
+                                            m.ParentId == conversation.Id && 
+                                            m.ParentType == ChatTask.Shared.Enums.ParentType.Conversation);
+                isMember = dmMember != null;
+            }
+            else if (conversation.Type == ChatTask.Shared.Enums.ConversationType.Channel)
+            {
+                // Channel için: Channel member'ı olmalı
+                var channelMember = await _context.Members
+                    .FirstOrDefaultAsync(m => m.UserId == request.SenderId && 
+                                            m.ParentId == conversation.Id && 
+                                            m.ParentType == ChatTask.Shared.Enums.ParentType.Conversation);
+                isMember = channelMember != null;
+            }
+            else
+            {
+                // Diğer conversation type'lar için: Workspace member'ı kontrol et
+                var workspaceMember = await _context.Members
+                    .FirstOrDefaultAsync(m => m.UserId == request.SenderId && 
+                                            m.ParentId == conversation.WorkspaceId && 
+                                            m.ParentType == ChatTask.Shared.Enums.ParentType.Workspace);
+                isMember = workspaceMember != null;
+            }
+            
+            if (!isMember)
+                return BadRequest("Bu conversation'a mesaj gönderme yetkiniz yok");
 
             var message = new Message
             {
@@ -707,20 +887,14 @@ public class ConversationController : ControllerBase
             if (conversation == null)
                 return NotFound("Conversation bulunamadÄ±");
 
-            if (conversation.Members.Any(m => m.GetUserId() == userId))
+            if (conversation.Members.Any(m => m.UserId == userId))
                 return BadRequest("Kullanıcı zaten üye");
 
-            var memberId = ChatTask.Shared.Helpers.MemberIdHelper.CreateMemberId(
-                userId, 
-                conversationId, 
-                MemberRole.Member
-            );
-            
             conversation.Members.Add(new Member
             {
-                Id = memberId,
                 UserId = userId,
                 ParentId = conversation.Id,
+                ParentType = ChatTask.Shared.Enums.ParentType.Conversation,
                 Role = MemberRole.Member,
                 JoinedAt = DateTime.UtcNow,
                 IsActive = true
@@ -743,7 +917,7 @@ public class ConversationController : ControllerBase
         try
         {
             var member = await _context.Members
-                .FirstOrDefaultAsync(m => m.GetParentId() == conversationId && m.GetUserId() == userId);
+                .FirstOrDefaultAsync(m => m.ParentId == conversationId && m.UserId == userId);
 
             if (member == null)
                 return NotFound("Üye bulunamadı");
@@ -756,6 +930,141 @@ public class ConversationController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, new { Message = "Ãœye Ã§Ä±karÄ±lÄ±rken hata oluÅŸtu", Error = ex.Message });
+        }
+    }
+
+    // YENÄ°: MesajÄ± okundu olarak iÅŸaretle
+    [HttpPut("messages/{messageId:guid}/read")]
+    public async Task<IActionResult> MarkMessageAsRead(Guid messageId, [FromBody] MarkMessageAsReadDto dto)
+    {
+        try
+        {
+            var message = await _context.Messages
+                .FirstOrDefaultAsync(m => m.Id == messageId);
+
+            if (message == null)
+                return NotFound("Mesaj bulunamadı");
+
+            // Kullanıcının bu conversation'a üye olup olmadığını kontrol et
+            var conversation = await _context.Conversations
+                .FirstOrDefaultAsync(c => c.Id == message.ConversationId);
+
+            if (conversation == null)
+                return NotFound("Conversation bulunamadı");
+
+            // Kullanıcının conversation'a üye olup olmadığını kontrol et
+            var isMember = await _context.Members
+                .AnyAsync(m => m.UserId == dto.UserId && 
+                               m.ParentId == conversation.Id && 
+                               m.ParentType == ChatTask.Shared.Enums.ParentType.Conversation);
+
+            if (!isMember)
+                return BadRequest("Bu mesajı okuma yetkiniz yok");
+
+            // Mesajı okundu olarak işaretle
+            message.IsRead = true;
+            await _context.SaveChangesAsync();
+
+            return Ok("Mesaj okundu olarak işaretlendi");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = "Mesaj işaretlenirken hata oluştu", Error = ex.Message });
+        }
+    }
+
+    // YENİ: Kullanıcı login olduğunda workspace'leri gönder
+    [HttpPost("users/{userId:guid}/login")]
+    public async Task<IActionResult> NotifyUserLogin(Guid userId)
+    {
+        try
+        {
+            Console.WriteLine($"[NotifyUserLogin] User {userId} logged in, getting workspaces...");
+
+            // Kullanıcının workspace'lerini getir
+            var userWorkspaces = await GetUserWorkspaces(userId);
+            
+            Console.WriteLine($"[NotifyUserLogin] Found {userWorkspaces.Count} workspaces for user {userId}");
+
+            // SignalR ile frontend'e gönder
+            await _hubContext.Clients.User(userId.ToString())
+                .SendAsync("UserWorkspaces", userWorkspaces);
+            
+            Console.WriteLine($"[NotifyUserLogin] Sent workspaces to user {userId} via SignalR");
+
+            return Ok(new { 
+                Message = "User workspaces sent to frontend", 
+                WorkspaceCount = userWorkspaces.Count 
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[NotifyUserLogin] Error: {ex.Message}");
+            return StatusCode(500, new { 
+                Message = "Failed to get user workspaces", 
+                Error = ex.Message 
+            });
+        }
+    }
+
+    private async Task<List<object>> GetUserWorkspaces(Guid userId)
+    {
+        try
+        {
+            // Kullanıcının üye olduğu workspace'leri getir
+            var workspaceIds = await _context.Members
+                .Where(m => m.UserId == userId && m.ParentType == ChatTask.Shared.Enums.ParentType.Workspace)
+                .Select(m => m.ParentId)
+                .ToListAsync();
+            
+            Console.WriteLine($"[GetUserWorkspaces] User {userId} is member of {workspaceIds.Count} workspaces");
+
+            var result = new List<object>();
+            
+            foreach (var workspaceId in workspaceIds)
+            {
+                var workspace = await _context.Workspaces.FindAsync(workspaceId);
+                if (workspace != null)
+                {
+                    // Workspace'deki conversation'ları getir
+                    var conversations = await _context.Conversations
+                        .Where(c => c.WorkspaceId == workspaceId)
+                        .Select(c => new
+                        {
+                            Id = c.Id,
+                            Name = c.Name,
+                            Description = c.Description,
+                            Type = c.Type.ToString(),
+                            IsPrivate = c.IsPrivate,
+                            MemberCount = c.Members.Count,
+                            LastMessage = c.Messages
+                                .OrderByDescending(m => m.CreatedAt)
+                                .Select(m => m.Content)
+                                .FirstOrDefault() ?? "No messages"
+                        })
+                        .ToListAsync();
+                    
+                    result.Add(new
+                    {
+                        Id = workspace.Id,
+                        Name = workspace.Name,
+                        Description = workspace.Description,
+                        CreatedById = workspace.CreatedById,
+                        IsActive = workspace.IsActive,
+                        CreatedAt = workspace.CreatedAt,
+                        MemberCount = workspace.Members.Count,
+                        Conversations = conversations
+                    });
+                }
+            }
+            
+            Console.WriteLine($"[GetUserWorkspaces] Returning {result.Count} workspaces with conversations");
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[GetUserWorkspaces] Error: {ex.Message}");
+            throw;
         }
     }
 }

@@ -15,6 +15,7 @@ builder.Services.AddDbContext<UserDbContext>(options =>
 
 // Services
 builder.Services.AddScoped<UserMappingService>();
+builder.Services.AddHttpClient();
 
 // CORS
 builder.Services.AddCors(options =>

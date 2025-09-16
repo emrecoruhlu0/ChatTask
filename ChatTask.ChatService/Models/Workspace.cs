@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ChatTask.ChatService.Models;
 
 public class Workspace
@@ -10,22 +12,27 @@ public class Workspace
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
-    // ÜYELİK YÖNETİMİ - Tek liste
+    // ÜYELİK YÖNETİMİ - Tek liste (NotMapped - explicit FK yok)
+    [NotMapped]
     public List<Member> Members { get; set; } = new();
     
     // TEK LİSTE - Tüm conversation türleri
     public List<Conversation> Conversations { get; set; } = new();
     
     // HELPER PROPERTIES - Filtrelenmiş erişim için
+    [NotMapped]
     public IEnumerable<Channel> Channels => 
         Conversations.OfType<Channel>();
     
+    [NotMapped]
     public IEnumerable<Group> Groups => 
         Conversations.OfType<Group>();
     
+    [NotMapped]
     public IEnumerable<DirectMessage> DirectMessages => 
         Conversations.OfType<DirectMessage>();
     
+    [NotMapped]
     public IEnumerable<TaskGroup> TaskGroups => 
         Conversations.OfType<TaskGroup>();
 }

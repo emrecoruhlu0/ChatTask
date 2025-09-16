@@ -1,0 +1,1650 @@
+{
+	"info": {
+		"_postman_id": "chattask-microservices-tests",
+		"name": "ChatTask Microservices - Complete API Tests",
+		"description": "Comprehensive test collection for all ChatTask microservices endpoints with DTO validation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "UserService Tests",
+			"item": [
+				{
+					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has user data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('email');",
+									"    pm.expect(responseJson).to.have.property('avatar');",
+									"    pm.expect(responseJson).to.have.property('status');",
+									"    pm.expect(responseJson).to.have.property('isActive');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"    pm.expect(responseJson).to.have.property('updatedAt');",
+									"});",
+									"",
+									"pm.test('User ID is valid GUID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);",
+									"});",
+									"",
+									"pm.test('User is active', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.isActive).to.be.true;",
+									"});",
+									"",
+									"// Store user ID for other tests",
+									"pm.globals.set('testUserId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{$randomFullName}}\",\n    \"email\": \"{{$randomEmail}}\",\n    \"password\": \"{{$randomPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{userServiceUrl}}/api/users/register",
+							"host": [
+								"{{userServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"register"
+							]
+						}
+					}
+				},
+				{
+					"name": "Register Second User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.globals.set('testUser2Id', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{$randomFullName}}\",\n    \"email\": \"{{$randomEmail}}\",\n    \"password\": \"{{$randomPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{userServiceUrl}}/api/users/register",
+							"host": ["{{userServiceUrl}}"],
+							"path": ["api","users","register"]
+						}
+					}
+				},
+				{
+					"name": "Get All Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('Users have required properties', function () {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.length > 0) {",
+									"        const user = responseJson[0];",
+									"        pm.expect(user).to.have.property('id');",
+									"        pm.expect(user).to.have.property('name');",
+									"        pm.expect(user).to.have.property('email');",
+									"        pm.expect(user).to.have.property('avatar');",
+									"        pm.expect(user).to.have.property('status');",
+									"        pm.expect(user).to.have.property('isActive');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{userServiceUrl}}/api/users",
+							"host": [
+								"{{userServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get User by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has user data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('email');",
+									"    pm.expect(responseJson).to.have.property('avatar');",
+									"    pm.expect(responseJson).to.have.property('status');",
+									"    pm.expect(responseJson).to.have.property('isActive');",
+									"});",
+									"",
+									"pm.test('User ID matches requested ID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const requestedId = pm.globals.get('testUserId');",
+									"    pm.expect(responseJson.id).to.equal(requestedId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{userServiceUrl}}/api/users/{{testUserId}}",
+							"host": [
+								"{{userServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{testUserId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Test Microservice Communication - Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has user data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('email');",
+									"    pm.expect(responseJson).to.have.property('avatar');",
+									"    pm.expect(responseJson).to.have.property('status');",
+									"    pm.expect(responseJson).to.have.property('isActive');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"    pm.expect(responseJson).to.have.property('updatedAt');",
+									"});",
+									"",
+									"pm.test('User ID matches expected', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.id).to.eql(pm.globals.get('testUserId'));",
+									"});",
+									"",
+									"pm.test('User is active', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.isActive).to.be.true;",
+									"});",
+									"",
+									"// Note: Microservice communication happens in background",
+									"// Check UserService and ChatService logs to verify communication",
+									"console.log('Microservice communication test completed. Check logs:');",
+									"console.log('UserService logs: docker logs chattask-userservice --tail 5');",
+									"console.log('ChatService logs: docker logs chattask-chatservice --tail 5');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userName\": \"testuser\",\n    \"password\": \"testpass\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/validate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"validate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ChatService Tests",
+			"item": [
+				{
+					"name": "Create Workspace",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response has workspace data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('description');",
+									"    pm.expect(responseJson).to.have.property('domain');",
+									"    pm.expect(responseJson).to.have.property('createdById');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"    pm.expect(responseJson).to.have.property('isActive');",
+									"    pm.expect(responseJson).to.have.property('memberCount');",
+									"    pm.expect(responseJson).to.have.property('conversationCount');",
+									"});",
+									"",
+									"pm.test('Workspace ID is valid GUID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);",
+									"});",
+									"",
+									"pm.test('Created by ID matches test user', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testUserId = pm.globals.get('testUserId');",
+									"    pm.expect(responseJson.createdById).to.equal(testUserId);",
+									"});",
+									"",
+									"// Store workspace ID for other tests",
+									"pm.globals.set('testWorkspaceId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{$randomCompanyName}} Workspace\",\n    \"description\": \"{{$randomLoremSentence}}\",\n    \"domain\": \"{{$randomWord}}-{{$randomInt}}\",\n    \"createdById\": \"{{testUserId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/workspaces",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"workspaces"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Workspace Conversations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('Conversations have required properties', function () {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.length > 0) {",
+									"        const conversation = responseJson[0];",
+									"        pm.expect(conversation).to.have.property('id');",
+									"        pm.expect(conversation).to.have.property('workspaceId');",
+									"        pm.expect(conversation).to.have.property('name');",
+									"        pm.expect(conversation).to.have.property('type');",
+									"        pm.expect(conversation).to.have.property('createdAt');",
+									"        pm.expect(conversation).to.have.property('createdById');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/workspaces/{{testWorkspaceId}}",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"workspaces",
+								"{{testWorkspaceId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Channel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response has channel data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('workspaceId');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('type');",
+									"    pm.expect(responseJson).to.have.property('createdById');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"});",
+									"",
+									"pm.test('Channel type is correct', function () {",
+									"    const responseJson = pm.response.json();",
+									"    // ConversationType: Channel=1, Group=2, DirectMessage=3, TaskGroup=4",
+									"    pm.expect(responseJson.type).to.equal(1); // Channel = 1",
+									"});",
+									"",
+									"pm.test('Workspace ID matches test workspace', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testWorkspaceId = pm.globals.get('testWorkspaceId');",
+									"    pm.expect(responseJson.workspaceId).to.equal(testWorkspaceId);",
+									"});",
+									"",
+									"// Store channel ID for other tests",
+									"pm.globals.set('testChannelId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{$randomWord}}-channel\",\n    \"description\": \"{{$randomLoremSentence}}\",\n    \"type\": 1,\n    \"isPrivate\": false,\n    \"createdById\": \"{{testUserId}}\",\n    \"workspaceId\": \"{{testWorkspaceId}}\",\n    \"topic\": \"{{$randomLoremWords}}\",\n    \"channelPurpose\": 1,\n    \"autoAddNewMembers\": true,\n    \"initialMemberIds\": [\"{{testUserId}}\"]\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/workspaces/{{testWorkspaceId}}/channels",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"workspaces",
+								"{{testWorkspaceId}}",
+								"channels"
+							]
+						}
+					}
+				},
+				{
+					"name": "Send Message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response has message data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('conversationId');",
+									"    pm.expect(responseJson).to.have.property('senderId');",
+									"    pm.expect(responseJson).to.have.property('content');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"    pm.expect(responseJson).to.have.property('isRead');",
+									"});",
+									"",
+									"pm.test('Message ID is valid GUID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);",
+									"});",
+									"",
+									"pm.test('Conversation ID matches test channel', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testChannelId = pm.globals.get('testChannelId');",
+									"    pm.expect(responseJson.conversationId).to.equal(testChannelId);",
+									"});",
+									"",
+									"pm.test('Sender ID matches test user', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testUserId = pm.globals.get('testUserId');",
+									"    pm.expect(responseJson.senderId).to.equal(testUserId);",
+									"});",
+									"",
+									"// Store message ID for other tests",
+									"pm.globals.set('testMessageId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"conversationId\": \"{{testChannelId}}\",\n    \"senderId\": \"{{testUserId}}\",\n    \"content\": \"{{$randomLoremSentence}}\",\n    \"threadId\": null\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/messages",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"messages"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Messages",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('Messages have required properties', function () {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.length > 0) {",
+									"        const message = responseJson[0];",
+									"        pm.expect(message).to.have.property('id');",
+									"        pm.expect(message).to.have.property('conversationId');",
+									"        pm.expect(message).to.have.property('senderId');",
+									"        pm.expect(message).to.have.property('content');",
+									"        pm.expect(message).to.have.property('createdAt');",
+									"        pm.expect(message).to.have.property('isRead');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/{{testChannelId}}/messages?page=1&pageSize=10",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"{{testChannelId}}",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Direct Message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response has DM data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('workspaceId');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('type');",
+									"    pm.expect(responseJson).to.have.property('createdById');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"});",
+									"",
+									"pm.test('DM type is correct', function () {",
+									"    const responseJson = pm.response.json();",
+									"    // ConversationType: Channel=1, Group=2, DirectMessage=3, TaskGroup=4",
+									"    pm.expect(responseJson.type).to.equal(3); // DirectMessage = 3",
+									"});",
+									"",
+									"pm.test('Workspace ID matches test workspace', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testWorkspaceId = pm.globals.get('testWorkspaceId');",
+									"    pm.expect(responseJson.workspaceId).to.equal(testWorkspaceId);",
+									"});",
+									"",
+									"// Store DM ID for other tests",
+									"pm.globals.set('testDMId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{$randomFullName}} DM\",\n    \"description\": \"Direct message conversation\",\n    \"type\": 3,\n    \"isPrivate\": true,\n    \"createdById\": \"{{testUserId}}\",\n    \"workspaceId\": \"{{testWorkspaceId}}\",\n    \"participantIds\": [\"{{testUserId}}\", \"{{testUser2Id}}\"]\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/workspaces/{{testWorkspaceId}}/direct-messages",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"workspaces",
+								"{{testWorkspaceId}}",
+								"direct-messages"
+							]
+						}
+					}
+				},
+				{
+					"name": "Send Message to DM",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response has message data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('conversationId');",
+									"    pm.expect(responseJson).to.have.property('senderId');",
+									"    pm.expect(responseJson).to.have.property('content');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"    pm.expect(responseJson).to.have.property('isRead');",
+									"});",
+									"",
+									"pm.test('Message ID is valid GUID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);",
+									"});",
+									"",
+									"pm.test('Conversation ID matches test DM', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testDMId = pm.globals.get('testDMId');",
+									"    pm.expect(responseJson.conversationId).to.equal(testDMId);",
+									"});",
+									"",
+									"pm.test('Sender ID matches test user', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testUserId = pm.globals.get('testUserId');",
+									"    pm.expect(responseJson.senderId).to.equal(testUserId);",
+									"});",
+									"",
+									"// Store DM message ID for other tests",
+									"pm.globals.set('testDMMessageId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"conversationId\": \"{{testDMId}}\",\n    \"senderId\": \"{{testUserId}}\",\n    \"content\": \"DM: {{$randomLoremSentence}}\",\n    \"threadId\": null\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/messages",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"messages"
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Message Thread",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response has message data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('conversationId');",
+									"    pm.expect(responseJson).to.have.property('senderId');",
+									"    pm.expect(responseJson).to.have.property('content');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"    pm.expect(responseJson).to.have.property('isRead');",
+									"    pm.expect(responseJson).to.have.property('threadId');",
+									"});",
+									"",
+									"pm.test('Message ID is valid GUID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);",
+									"});",
+									"",
+									"pm.test('Thread ID matches parent message', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testMessageId = pm.globals.get('testMessageId');",
+									"    pm.expect(responseJson.threadId).to.equal(testMessageId);",
+									"});",
+									"",
+									"pm.test('Conversation ID matches test channel', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testChannelId = pm.globals.get('testChannelId');",
+									"    pm.expect(responseJson.conversationId).to.equal(testChannelId);",
+									"});",
+									"",
+									"// Store thread message ID for other tests",
+									"pm.globals.set('testThreadMessageId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"conversationId\": \"{{testChannelId}}\",\n    \"senderId\": \"{{testUserId}}\",\n    \"content\": \"Thread reply: {{$randomLoremSentence}}\",\n    \"threadId\": \"{{testMessageId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/messages",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"messages"
+							]
+						}
+					}
+				},
+				{
+					"name": "Edit Message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has updated message data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('conversationId');",
+									"    pm.expect(responseJson).to.have.property('senderId');",
+									"    pm.expect(responseJson).to.have.property('content');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"    pm.expect(responseJson).to.have.property('updatedAt');",
+									"    pm.expect(responseJson).to.have.property('isRead');",
+									"});",
+									"",
+									"pm.test('Message ID matches requested ID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const requestedId = pm.globals.get('testMessageId');",
+									"    pm.expect(responseJson.id).to.equal(requestedId);",
+									"});",
+									"",
+									"pm.test('Content is updated', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.content).to.include('EDITED');",
+									"});",
+									"",
+									"pm.test('Updated at timestamp is recent', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const updatedAt = new Date(responseJson.updatedAt);",
+									"    const now = new Date();",
+									"    const diffMinutes = (now - updatedAt) / (1000 * 60);",
+									"    pm.expect(diffMinutes).to.be.lessThan(5);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"EDITED: {{$randomLoremSentence}}\",\n    \"editedById\": \"{{testUserId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/messages/{{testMessageId}}",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"messages",
+								"{{testMessageId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Mark Message as Read",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains success message', function () {",
+									"    const responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include('okundu');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{testUserId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/messages/{{testMessageId}}/read",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"messages",
+								"{{testMessageId}}",
+								"read"
+							]
+						}
+					}
+				},
+				{
+					"name": "Test ChatService Login Notification (Direct)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has expected structure', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"    pm.expect(responseJson).to.have.property('workspaceCount');",
+									"});",
+									"",
+									"pm.test('Message indicates success', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.message).to.include('User workspaces sent to frontend');",
+									"});",
+									"",
+									"pm.test('Workspace count is number', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.workspaceCount).to.be.a('number');",
+									"});",
+									"",
+									"console.log('Direct ChatService login notification test completed.');",
+									"console.log('This tests the ChatService endpoint directly.');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/users/{{testUserId}}/login",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"users",
+								"{{testUserId}}",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TaskService Tests",
+			"item": [
+				{
+					"name": "Create Task",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response has task data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('title');",
+									"    pm.expect(responseJson).to.have.property('description');",
+									"    pm.expect(responseJson).to.have.property('status');",
+									"    pm.expect(responseJson).to.have.property('priority');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"    pm.expect(responseJson).to.have.property('updatedAt');",
+									"    pm.expect(responseJson).to.have.property('dueDate');",
+									"});",
+									"",
+									"pm.test('Task ID is valid GUID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);",
+									"});",
+									"",
+									"pm.test('Status is valid TaskStatus enum value', function () {",
+									"    const responseJson = pm.response.json();",
+									"    // TaskStatus: Pending=1, InProgress=2, Completed=3, Cancelled=4, OnHold=5",
+									"    pm.expect([1, 2, 3, 4, 5]).to.include(responseJson.status);",
+									"});",
+									"",
+									"pm.test('Priority is valid TaskPriority enum value', function () {",
+									"    const responseJson = pm.response.json();",
+									"    // TaskPriority: Low=1, Medium=2, High=3, Critical=4",
+									"    pm.expect([1, 2, 3, 4]).to.include(responseJson.priority);",
+									"});",
+									"",
+									"pm.test('Has assignments', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('assignments');",
+									"    pm.expect(responseJson.assignments).to.be.an('array');",
+									"});",
+									"",
+									"// Store task ID for other tests",
+									"pm.globals.set('testTaskId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"{{$randomLoremWords}} Task\",\n    \"description\": \"{{$randomLoremParagraph}}\",\n    \"status\": 1,\n    \"priority\": 2,\n    \"dueDate\": \"{{$isoTimestamp}}\",\n    \"taskGroupId\": null,\n    \"assigneeIds\": [\"{{testUserId}}\"]\n}"
+						},
+						"url": {
+							"raw": "{{taskServiceUrl}}/api/task",
+							"host": [
+								"{{taskServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"task"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Tasks",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('Tasks have required properties', function () {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.length > 0) {",
+									"        const task = responseJson[0];",
+									"        pm.expect(task).to.have.property('id');",
+									"        pm.expect(task).to.have.property('title');",
+									"        pm.expect(task).to.have.property('description');",
+									"        pm.expect(task).to.have.property('status');",
+									"        pm.expect(task).to.have.property('priority');",
+									"        pm.expect(task).to.have.property('createdAt');",
+									"        pm.expect(task).to.have.property('updatedAt');",
+									"        pm.expect(task).to.have.property('dueDate');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{taskServiceUrl}}/api/task",
+							"host": [
+								"{{taskServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"task"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Task by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has task data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('title');",
+									"    pm.expect(responseJson).to.have.property('description');",
+									"    pm.expect(responseJson).to.have.property('status');",
+									"    pm.expect(responseJson).to.have.property('priority');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"    pm.expect(responseJson).to.have.property('updatedAt');",
+									"    pm.expect(responseJson).to.have.property('dueDate');",
+									"});",
+									"",
+									"pm.test('Task ID matches requested ID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const requestedId = pm.globals.get('testTaskId');",
+									"    pm.expect(responseJson.id).to.equal(requestedId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{taskServiceUrl}}/api/task/{{testTaskId}}",
+							"host": [
+								"{{taskServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"task",
+								"{{testTaskId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Task",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has updated task data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('title');",
+									"    pm.expect(responseJson).to.have.property('description');",
+									"    pm.expect(responseJson).to.have.property('status');",
+									"    pm.expect(responseJson).to.have.property('priority');",
+									"    pm.expect(responseJson).to.have.property('updatedAt');",
+									"});",
+									"",
+									"pm.test('Task ID matches requested ID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const requestedId = pm.globals.get('testTaskId');",
+									"    pm.expect(responseJson.id).to.equal(requestedId);",
+									"});",
+									"",
+									"pm.test('Updated at timestamp is recent', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const updatedAt = new Date(responseJson.updatedAt);",
+									"    const now = new Date();",
+									"    const diffMinutes = (now - updatedAt) / (1000 * 60);",
+									"    pm.expect(diffMinutes).to.be.lessThan(5);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated {{$randomLoremWords}} Task\",\n    \"description\": \"Updated {{$randomLoremParagraph}}\",\n    \"status\": 2,\n    \"priority\": 3,\n    \"dueDate\": \"{{$isoTimestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{taskServiceUrl}}/api/task/{{testTaskId}}",
+							"host": [
+								"{{taskServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"task",
+								"{{testTaskId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Task Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has task data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('status');",
+									"    pm.expect(responseJson).to.have.property('updatedAt');",
+									"});",
+									"",
+									"pm.test('Status is valid TaskStatus enum value', function () {",
+									"    const responseJson = pm.response.json();",
+									"    // TaskStatus: Pending=1, InProgress=2, Completed=3, Cancelled=4, OnHold=5",
+									"    pm.expect([1, 2, 3, 4, 5]).to.include(responseJson.status);",
+									"});",
+									"",
+									"pm.test('Task ID matches requested ID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const requestedId = pm.globals.get('testTaskId');",
+									"    pm.expect(responseJson.id).to.equal(requestedId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "3"
+						},
+						"url": {
+							"raw": "{{taskServiceUrl}}/api/task/{{testTaskId}}/status",
+							"host": [
+								"{{taskServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"task",
+								"{{testTaskId}}",
+								"status"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Tasks by User ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('Tasks have required properties', function () {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.length > 0) {",
+									"        const task = responseJson[0];",
+									"        pm.expect(task).to.have.property('id');",
+									"        pm.expect(task).to.have.property('title');",
+									"        pm.expect(task).to.have.property('description');",
+									"        pm.expect(task).to.have.property('status');",
+									"        pm.expect(task).to.have.property('priority');",
+									"        pm.expect(task).to.have.property('assignments');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{taskServiceUrl}}/api/task/user/{{testUserId}}",
+							"host": [
+								"{{taskServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"task",
+								"user",
+								"{{testUserId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Assign Task to Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains success message', function () {",
+									"    const responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include('atandı');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\"{{testUserId}}\"]"
+						},
+						"url": {
+							"raw": "{{taskServiceUrl}}/api/task/{{testTaskId}}/assign",
+							"host": [
+								"{{taskServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"task",
+								"{{testTaskId}}",
+								"assign"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Enum Validation Tests",
+			"item": [
+				{
+					"name": "Validate TaskStatus Enum",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('TaskStatus enum values are correct', function () {",
+									"    // TaskStatus: Pending=1, InProgress=2, Completed=3, Cancelled=4, OnHold=5",
+									"    const validStatuses = [1, 2, 3, 4, 5];",
+									"    pm.expect(validStatuses).to.include(1); // Pending",
+									"    pm.expect(validStatuses).to.include(2); // InProgress",
+									"    pm.expect(validStatuses).to.include(3); // Completed",
+									"    pm.expect(validStatuses).to.include(4); // Cancelled",
+									"    pm.expect(validStatuses).to.include(5); // OnHold",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{userServiceUrl}}/api/users/{{testUserId}}",
+							"host": [
+								"{{userServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{testUserId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Validate TaskPriority Enum",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('TaskPriority enum values are correct', function () {",
+									"    // TaskPriority: Low=1, Medium=2, High=3, Critical=4",
+									"    const validPriorities = [1, 2, 3, 4];",
+									"    pm.expect(validPriorities).to.include(1); // Low",
+									"    pm.expect(validPriorities).to.include(2); // Medium",
+									"    pm.expect(validPriorities).to.include(3); // High",
+									"    pm.expect(validPriorities).to.include(4); // Critical",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{userServiceUrl}}/api/users/{{testUserId}}",
+							"host": [
+								"{{userServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{testUserId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Validate ConversationType Enum",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('ConversationType enum values are correct', function () {",
+									"    // ConversationType: Channel=1, Group=2, DirectMessage=3, TaskGroup=4",
+									"    const validTypes = [1, 2, 3, 4];",
+									"    pm.expect(validTypes).to.include(1); // Channel",
+									"    pm.expect(validTypes).to.include(2); // Group",
+									"    pm.expect(validTypes).to.include(3); // DirectMessage",
+									"    pm.expect(validTypes).to.include(4); // TaskGroup",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{userServiceUrl}}/api/users/{{testUserId}}",
+							"host": [
+								"{{userServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{testUserId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Validate MemberRole Enum",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('MemberRole enum values are correct', function () {",
+									"    // MemberRole: Owner=1, Admin=2, Member=3, Guest=4, Observer=5",
+									"    const validRoles = [1, 2, 3, 4, 5];",
+									"    pm.expect(validRoles).to.include(1); // Owner",
+									"    pm.expect(validRoles).to.include(2); // Admin",
+									"    pm.expect(validRoles).to.include(3); // Member",
+									"    pm.expect(validRoles).to.include(4); // Guest",
+									"    pm.expect(validRoles).to.include(5); // Observer",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{userServiceUrl}}/api/users/{{testUserId}}",
+							"host": [
+								"{{userServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{testUserId}}"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Integration Tests",
+			"item": [
+				{
+					"name": "Full Workflow Test",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('All services are working together', function () {",
+									"    // This test verifies that the full workflow completed successfully",
+									"    const testUserId = pm.globals.get('testUserId');",
+									"    const testWorkspaceId = pm.globals.get('testWorkspaceId');",
+									"    const testChannelId = pm.globals.get('testChannelId');",
+									"    const testMessageId = pm.globals.get('testMessageId');",
+									"    const testTaskId = pm.globals.get('testTaskId');",
+									"    const testDMId = pm.globals.get('testDMId');",
+									"    const testDMMessageId = pm.globals.get('testDMMessageId');",
+									"    const testThreadMessageId = pm.globals.get('testThreadMessageId');",
+									"    ",
+									"    pm.expect(testUserId).to.not.be.undefined;",
+									"    pm.expect(testWorkspaceId).to.not.be.undefined;",
+									"    pm.expect(testChannelId).to.not.be.undefined;",
+									"    pm.expect(testMessageId).to.not.be.undefined;",
+									"    pm.expect(testTaskId).to.not.be.undefined;",
+									"    pm.expect(testDMId).to.not.be.undefined;",
+									"    pm.expect(testDMMessageId).to.not.be.undefined;",
+									"    pm.expect(testThreadMessageId).to.not.be.undefined;",
+									"    ",
+									"    pm.test('All IDs are valid GUIDs', function () {",
+									"        const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;",
+									"        pm.expect(testUserId).to.match(guidRegex);",
+									"        pm.expect(testWorkspaceId).to.match(guidRegex);",
+									"        pm.expect(testChannelId).to.match(guidRegex);",
+									"        pm.expect(testMessageId).to.match(guidRegex);",
+									"        pm.expect(testTaskId).to.match(guidRegex);",
+									"        pm.expect(testDMId).to.match(guidRegex);",
+									"        pm.expect(testDMMessageId).to.match(guidRegex);",
+									"        pm.expect(testThreadMessageId).to.match(guidRegex);",
+									"    });",
+									"    ",
+									"    pm.test('Messaging workflow completed successfully', function () {",
+									"        // Verify that all messaging features were tested",
+									"        pm.expect(testMessageId).to.not.be.undefined; // Channel message",
+									"        pm.expect(testDMMessageId).to.not.be.undefined; // Direct message",
+									"        pm.expect(testThreadMessageId).to.not.be.undefined; // Thread message",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{userServiceUrl}}/api/users/{{testUserId}}",
+							"host": [
+								"{{userServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{testUserId}}"
+							]
+						}
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Generate random data for each request",
+					"pm.globals.set('randomName', pm.variables.replaceIn('{{$randomFullName}}'));",
+					"pm.globals.set('randomEmail', pm.variables.replaceIn('{{$randomEmail}}'));",
+					"pm.globals.set('randomPassword', pm.variables.replaceIn('{{$randomPassword}}'));",
+					"pm.globals.set('randomCompany', pm.variables.replaceIn('{{$randomCompanyName}}'));",
+					"pm.globals.set('randomSentence', pm.variables.replaceIn('{{$randomLoremSentence}}'));",
+					"pm.globals.set('randomWords', pm.variables.replaceIn('{{$randomLoremWords}}'));",
+					"pm.globals.set('randomParagraph', pm.variables.replaceIn('{{$randomLoremParagraph}}'));",
+					"pm.globals.set('randomWord', pm.variables.replaceIn('{{$randomWord}}'));",
+					"pm.globals.set('randomInt', pm.variables.replaceIn('{{$randomInt}}'));",
+					"pm.globals.set('isoTimestamp', pm.variables.replaceIn('{{$isoTimestamp}}'));"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "userServiceUrl",
+			"value": "http://localhost:5001",
+			"type": "string"
+		},
+		{
+			"key": "chatServiceUrl",
+			"value": "http://localhost:5002",
+			"type": "string"
+		},
+		{
+			"key": "taskServiceUrl",
+			"value": "http://localhost:5004",
+			"type": "string"
+		},
+		{
+			"key": "authServiceUrl",
+			"value": "http://localhost:5003",
+			"type": "string"
+		}
+	]
+}

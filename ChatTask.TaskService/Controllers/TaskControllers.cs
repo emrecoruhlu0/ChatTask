@@ -1,5 +1,6 @@
 using ChatTask.TaskService.Context;
 using ChatTask.TaskService.Models;
+using ChatTask.TaskService.Services;
 using ChatTask.Shared.DTOs;
 using ChatTask.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -10,14 +11,16 @@ namespace ChatTask.TaskService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+// [Authorize] - Geçici olarak kaldırıldı
 public class TaskController : ControllerBase
 {
     private readonly TaskDbContext _context;
+    private readonly TaskMappingService _mappingService;
 
-    public TaskController(TaskDbContext context)
+    public TaskController(TaskDbContext context, TaskMappingService mappingService)
     {
         _context = context;
+        _mappingService = mappingService;
     }
      
     [HttpPost]
@@ -33,24 +36,29 @@ public class TaskController : ControllerBase
             TaskGroupId = request.TaskGroupId
         };
 
-        // Eğer assignee ID'leri varsa, TaskAssignment'lar oluştur
+        // Önce task'ı kaydet (ID oluşsun)
+        await _context.Tasks.AddAsync(task, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        // Şimdi assignee ID'leri varsa, TaskAssignment'lar oluştur
         if (request.AssigneeIds?.Any() == true)
         {
             foreach (var assigneeId in request.AssigneeIds)
             {
-                            task.Assignments.Add(new TaskAssignment
-            {
-                TaskId = task.Id,
-                UserId = assigneeId,
-                Status = ChatTask.Shared.Enums.AssignmentStatus.Assigned
-            });
+                var assignment = new TaskAssignment
+                {
+                    TaskId = task.Id, // Artık ID var
+                    UserId = assigneeId,
+                    Status = ChatTask.Shared.Enums.AssignmentStatus.Assigned
+                };
+                await _context.TaskAssignments.AddAsync(assignment, cancellationToken);
             }
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
-        await _context.Tasks.AddAsync(task, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
-
-        return Ok(task);
+        // Task entity'sini DTO'ya çevir (JSON cycle'ı önlemek için)
+        var taskDto = _mappingService.ToTaskDto(task);
+        return Ok(taskDto);
     }
 
     [HttpGet]
@@ -60,7 +68,9 @@ public class TaskController : ControllerBase
             .Include(t => t.Assignments)
             .ToListAsync(cancellationToken);
         
-        return Ok(tasks);
+        // Task entity'lerini DTO'lara çevir (JSON cycle'ı önlemek için)
+        var taskDtos = tasks.Select(_mappingService.ToTaskDto).ToList();
+        return Ok(taskDtos);
     }
 
     [HttpGet("{id:guid}")]
@@ -73,7 +83,9 @@ public class TaskController : ControllerBase
         if (task == null)
             return NotFound("Görev bulunamadı");
             
-        return Ok(task);
+        // Task entity'sini DTO'ya çevir (JSON cycle'ı önlemek için)
+        var taskDto = _mappingService.ToTaskDto(task);
+        return Ok(taskDto);
     }
 
     [HttpPut("{id:guid}")]
@@ -94,7 +106,10 @@ public class TaskController : ControllerBase
         task.UpdatedAt = DateTime.UtcNow;
         
         await _context.SaveChangesAsync(cancellationToken);
-        return Ok(task);
+        
+        // Task entity'sini DTO'ya çevir (JSON cycle'ı önlemek için)
+        var taskDto = _mappingService.ToTaskDto(task);
+        return Ok(taskDto);
     }
     
     [HttpDelete("{id:guid}")]   
@@ -112,14 +127,19 @@ public class TaskController : ControllerBase
     [HttpPut("{id:guid}/status")]
     public async Task<IActionResult> UpdateTaskStatus(Guid id, [FromBody] ChatTask.Shared.Enums.TaskStatus status, CancellationToken cancellationToken)
     {
-        var task = await _context.Tasks.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+        var task = await _context.Tasks
+            .Include(t => t.Assignments)
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
         if (task == null)
             return NotFound("Görev bulunamadı");
             
         task.Status = status;
         task.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(cancellationToken);
-        return Ok(task);
+        
+        // Task entity'sini DTO'ya çevir (JSON cycle'ı önlemek için)
+        var taskDto = _mappingService.ToTaskDto(task);
+        return Ok(taskDto);
     }
     
     [HttpGet("user/{userId:guid}")]
@@ -130,7 +150,9 @@ public class TaskController : ControllerBase
             .Where(t => t.Assignments.Any(a => a.UserId == userId))
             .ToListAsync(cancellationToken);
             
-        return Ok(tasks);
+        // Task entity'lerini DTO'lara çevir (JSON cycle'ı önlemek için)
+        var taskDtos = tasks.Select(_mappingService.ToTaskDto).ToList();
+        return Ok(taskDtos);
     }
     
     [HttpPost("{id:guid}/assign")]

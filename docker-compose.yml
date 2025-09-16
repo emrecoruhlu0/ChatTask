@@ -74,12 +74,50 @@ services:
     networks:
       - chattask-network
 
+  # TaskService
+  taskservice:
+    build:
+      context: .
+      dockerfile: ChatTask.TaskService/Dockerfile
+    container_name: chattask-taskservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:5004
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=ChatTask_TaskService;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+      - Services__UserService__BaseUrl=http://userservice:5001
+      - Jwt__Issuer=chat-task
+      - Jwt__Audience=chat-task-audience
+      - Jwt__Key=dev-secret-key-change-me-please-1234567890
+      - Jwt__ExpiresMinutes=60
+    ports:
+      - "5004:5004"
+    depends_on:
+      - sqlserver
+      - userservice
+    networks:
+      - chattask-network
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: ChatTask.Frontend/Dockerfile
+    container_name: chattask-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - userservice
+      - chatservice
+      - taskservice
+    networks:
+      - chattask-network
+
   # Database Admin Interface - Adminer
   adminer:
     image: adminer:latest
     container_name: chattask-adminer
     ports:
-      - "8080:8080"
+      - "8081:8080"
     depends_on:
       - sqlserver
     networks:

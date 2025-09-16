@@ -1,4 +1,5 @@
 using ChatTask.ChatService.Context;
+using ChatTask.ChatService.Models;
 using ChatTask.ChatService.Hubs;
 using ChatTask.ChatService.Services;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,10 @@ builder.Services.AddSwaggerGen();
 
 // Database
 builder.Services.AddDbContext<ChatDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options
+        .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .EnableSensitiveDataLogging()
+        .LogTo(Console.WriteLine, LogLevel.Information));
 
 // HTTP Client for User Service - DÜZELTME: Base URL'i appsettings'ten al
 builder.Services.AddHttpClient<IUserService, UserService>(client =>
@@ -76,6 +80,46 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 var app = builder.Build();
+
+// Dump EF model diagnostics for Conversation to trace shadow FKs
+using (var scope = app.Services.CreateScope())
+{
+    var ctx = scope.ServiceProvider.GetRequiredService<ChatDbContext>();
+    try
+    {
+        var entityType = ctx.Model.FindEntityType(typeof(Conversation));
+        if (entityType != null)
+        {
+            Console.WriteLine("[EFModel] Conversation properties:");
+            foreach (var p in entityType.GetProperties())
+            {
+                Console.WriteLine($" - {p.Name} (column: {p.GetColumnName()})");
+            }
+            Console.WriteLine("[EFModel] Conversation FKs:");
+            foreach (var fk in entityType.GetForeignKeys())
+            {
+                var depProps = string.Join(",", fk.Properties.Select(x => x.Name));
+                Console.WriteLine($" - FK to {fk.PrincipalEntityType.DisplayName()} on [{depProps}] delete: {fk.DeleteBehavior}");
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[EFModel] Dump error: {ex.Message}");
+    }
+    
+    // Database'i oluştur (migration yerine)
+    try
+    {
+        ctx.Database.EnsureCreated();
+        Console.WriteLine("[Database] Tables created successfully");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[Database] EnsureCreated error: {ex.Message}");
+    }
+}
+
 
 if (app.Environment.IsDevelopment())
 {

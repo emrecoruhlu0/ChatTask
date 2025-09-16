@@ -19,7 +19,8 @@ public class TaskMappingService
             UpdatedAt = task.UpdatedAt,
             DueDate = task.DueDate,
             TaskGroupId = task.TaskGroupId,
-            AssignmentCount = task.Assignments.Count
+            AssignmentCount = task.Assignments.Count,
+            Assignments = task.Assignments.Select(ToTaskAssignmentDto).ToList()
         };
     }
 

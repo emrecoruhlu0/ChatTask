@@ -11,7 +11,7 @@ public class TaskGroup : Conversation
     public override bool CanUserJoin(Guid userId)
     {
         // Task group'a sadece atanan kişiler katılabilir
-        return Members.Any(m => m.GetUserId() == userId);
+        return Members.Any(m => m.UserId == userId);
     }
     
     public override string GetDisplayName()

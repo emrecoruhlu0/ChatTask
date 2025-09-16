@@ -1,0 +1,1170 @@
+{
+	"id": "b8553087-8992-4e01-bb30-c097c932e795",
+	"name": "ChatTask Microservices - Complete API Tests",
+	"timestamp": "2025-09-16T17:21:14.822Z",
+	"collection_id": "47034976-077a891c-b95d-4164-a2d0-39c764f1cb21",
+	"folder_id": 0,
+	"environment_id": "47034976-ca8d2e67-37c6-4a38-8c1f-f983510ea270",
+	"totalPass": 78,
+	"delay": 0,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2025-09-16T17:21:08.941Z",
+	"totalFail": 5,
+	"results": [
+		{
+			"id": "6800f524-aaba-49dd-b67a-7cf302f331a5",
+			"name": "Register User",
+			"url": "http://localhost:5001/api/users/register",
+			"time": 1977,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Response has user data": true,
+				"User ID is valid GUID": true,
+				"User is active": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has user data": {
+					"pass": 1,
+					"fail": 0
+				},
+				"User ID is valid GUID": {
+					"pass": 1,
+					"fail": 0
+				},
+				"User is active": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				1977
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Response has user data": true,
+					"User ID is valid GUID": true,
+					"User is active": true
+				}
+			]
+		},
+		{
+			"id": "bf03f674-7ad2-4a1a-a2f2-6edfb88143b9",
+			"name": "Register Second User",
+			"url": "http://localhost:5001/api/users/register",
+			"time": 169,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				169
+			],
+			"allTests": [
+				{
+					"Status code is 200": true
+				}
+			]
+		},
+		{
+			"id": "fb947530-da8e-4023-833b-5696f5796f1b",
+			"name": "Get All Users",
+			"url": "http://localhost:5001/api/users",
+			"time": 187,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Response is an array": true,
+				"Users have required properties": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response is an array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Users have required properties": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				187
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Response is an array": true,
+					"Users have required properties": true
+				}
+			]
+		},
+		{
+			"id": "2a74b307-657b-4ff1-ada7-6aed55e1c938",
+			"name": "Get User by ID",
+			"url": "http://localhost:5001/api/users/37c4015d-6e10-40c4-865d-fdb59d07b4eb",
+			"time": 95,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Response has user data": true,
+				"User ID matches requested ID": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has user data": {
+					"pass": 1,
+					"fail": 0
+				},
+				"User ID matches requested ID": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				95
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Response has user data": true,
+					"User ID matches requested ID": true
+				}
+			]
+		},
+		{
+			"id": "8f3824fe-c55b-4ee3-bcaa-d0e625acbab2",
+			"name": "Create Workspace",
+			"url": "http://localhost:5002/api/conversations/workspaces",
+			"time": 179,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200 or 201": true,
+				"Response has workspace data": true,
+				"Workspace ID is valid GUID": true,
+				"Created by ID matches test user": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200 or 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has workspace data": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Workspace ID is valid GUID": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Created by ID matches test user": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				179
+			],
+			"allTests": [
+				{
+					"Status code is 200 or 201": true,
+					"Response has workspace data": true,
+					"Workspace ID is valid GUID": true,
+					"Created by ID matches test user": true
+				}
+			]
+		},
+		{
+			"id": "296d20ec-c747-4608-b3c5-520cab547803",
+			"name": "Get Workspace Conversations",
+			"url": "http://localhost:5002/api/conversations/workspaces/43c16d61-7dc9-4193-8572-955c10431feb",
+			"time": 82,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Response is an array": true,
+				"Conversations have required properties": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response is an array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Conversations have required properties": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				82
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Response is an array": true,
+					"Conversations have required properties": true
+				}
+			]
+		},
+		{
+			"id": "d9005b32-1c37-4b2a-81a2-381a2bc1c5e2",
+			"name": "Create Channel",
+			"url": "http://localhost:5002/api/conversations/workspaces/43c16d61-7dc9-4193-8572-955c10431feb/channels",
+			"time": 129,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200 or 201": true,
+				"Response has channel data": true,
+				"Channel type is correct": true,
+				"Workspace ID matches test workspace": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200 or 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has channel data": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Channel type is correct": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Workspace ID matches test workspace": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				129
+			],
+			"allTests": [
+				{
+					"Status code is 200 or 201": true,
+					"Response has channel data": true,
+					"Channel type is correct": true,
+					"Workspace ID matches test workspace": true
+				}
+			]
+		},
+		{
+			"id": "fe3199a8-158c-4206-981f-85c8cd488893",
+			"name": "Send Message",
+			"url": "http://localhost:5002/api/conversations/messages",
+			"time": 26,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200 or 201": true,
+				"Response has message data": true,
+				"Message ID is valid GUID": true,
+				"Conversation ID matches test channel": true,
+				"Sender ID matches test user": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200 or 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has message data": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Message ID is valid GUID": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Conversation ID matches test channel": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Sender ID matches test user": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				26
+			],
+			"allTests": [
+				{
+					"Status code is 200 or 201": true,
+					"Response has message data": true,
+					"Message ID is valid GUID": true,
+					"Conversation ID matches test channel": true,
+					"Sender ID matches test user": true
+				}
+			]
+		},
+		{
+			"id": "72e0c0a6-dc8a-440f-999c-97c1878655ad",
+			"name": "Get Messages",
+			"url": "http://localhost:5002/api/conversations/8c19aa92-f528-43da-8c2e-08ddf5456f65/messages?page=1&pageSize=10",
+			"time": 10,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Response is an array": true,
+				"Messages have required properties": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response is an array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Messages have required properties": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				10
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Response is an array": true,
+					"Messages have required properties": true
+				}
+			]
+		},
+		{
+			"id": "0920e01b-974d-4d99-9601-a57961fb0e2f",
+			"name": "Create Direct Message",
+			"url": "http://localhost:5002/api/conversations/workspaces/43c16d61-7dc9-4193-8572-955c10431feb/direct-messages",
+			"time": 208,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200 or 201": true,
+				"Response has DM data": true,
+				"DM type is correct": true,
+				"Workspace ID matches test workspace": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200 or 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has DM data": {
+					"pass": 1,
+					"fail": 0
+				},
+				"DM type is correct": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Workspace ID matches test workspace": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				208
+			],
+			"allTests": [
+				{
+					"Status code is 200 or 201": true,
+					"Response has DM data": true,
+					"DM type is correct": true,
+					"Workspace ID matches test workspace": true
+				}
+			]
+		},
+		{
+			"id": "ec7b3ce5-181b-434e-b3ef-ba073d85638d",
+			"name": "Send Message to DM",
+			"url": "http://localhost:5002/api/conversations/messages",
+			"time": 24,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200 or 201": true,
+				"Response has message data": true,
+				"Message ID is valid GUID": true,
+				"Conversation ID matches test DM": true,
+				"Sender ID matches test user": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200 or 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has message data": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Message ID is valid GUID": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Conversation ID matches test DM": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Sender ID matches test user": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				24
+			],
+			"allTests": [
+				{
+					"Status code is 200 or 201": true,
+					"Response has message data": true,
+					"Message ID is valid GUID": true,
+					"Conversation ID matches test DM": true,
+					"Sender ID matches test user": true
+				}
+			]
+		},
+		{
+			"id": "7c09ad99-fcca-40bb-9aab-6a142f2e4846",
+			"name": "Create Message Thread",
+			"url": "http://localhost:5002/api/conversations/messages",
+			"time": 22,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200 or 201": true,
+				"Response has message data": true,
+				"Message ID is valid GUID": true,
+				"Thread ID matches parent message": true,
+				"Conversation ID matches test channel": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200 or 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has message data": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Message ID is valid GUID": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Thread ID matches parent message": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Conversation ID matches test channel": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				22
+			],
+			"allTests": [
+				{
+					"Status code is 200 or 201": true,
+					"Response has message data": true,
+					"Message ID is valid GUID": true,
+					"Thread ID matches parent message": true,
+					"Conversation ID matches test channel": true
+				}
+			]
+		},
+		{
+			"id": "dd439cb0-0c7b-4388-a9f4-d2266dc058c7",
+			"name": "Edit Message",
+			"url": "http://localhost:5002/api/conversations/messages/9c7917b2-3092-43e4-403b-08ddf5455345",
+			"time": 5,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code is 200": false,
+				"Response has updated message data": false,
+				"Message ID matches requested ID": false,
+				"Content is updated": false,
+				"Updated at timestamp is recent": false
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Response has updated message data": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Message ID matches requested ID": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Content is updated": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Updated at timestamp is recent": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				5
+			],
+			"allTests": [
+				{
+					"Status code is 200": false,
+					"Response has updated message data": false,
+					"Message ID matches requested ID": false,
+					"Content is updated": false,
+					"Updated at timestamp is recent": false
+				}
+			]
+		},
+		{
+			"id": "6898ce70-c140-4407-b9b7-0a943dc3cc6d",
+			"name": "Mark Message as Read",
+			"url": "http://localhost:5002/api/conversations/messages/9c7917b2-3092-43e4-403b-08ddf5455345/read",
+			"time": 24,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Response contains success message": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response contains success message": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				24
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Response contains success message": true
+				}
+			]
+		},
+		{
+			"id": "9fc248ba-a70c-4d1a-b99e-9e526b6b45b1",
+			"name": "Create Task",
+			"url": "http://localhost:5004/api/task",
+			"time": 30,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200 or 201": true,
+				"Response has task data": true,
+				"Task ID is valid GUID": true,
+				"Status is valid TaskStatus enum value": true,
+				"Priority is valid TaskPriority enum value": true,
+				"Has assignments": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200 or 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has task data": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Task ID is valid GUID": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Status is valid TaskStatus enum value": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Priority is valid TaskPriority enum value": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Has assignments": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				30
+			],
+			"allTests": [
+				{
+					"Status code is 200 or 201": true,
+					"Response has task data": true,
+					"Task ID is valid GUID": true,
+					"Status is valid TaskStatus enum value": true,
+					"Priority is valid TaskPriority enum value": true,
+					"Has assignments": true
+				}
+			]
+		},
+		{
+			"id": "a5e88868-92a0-4276-bad9-21b3e883bdcc",
+			"name": "Get All Tasks",
+			"url": "http://localhost:5004/api/task",
+			"time": 9,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Response is an array": true,
+				"Tasks have required properties": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response is an array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Tasks have required properties": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				9
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Response is an array": true,
+					"Tasks have required properties": true
+				}
+			]
+		},
+		{
+			"id": "c36da3e7-259f-4caa-ab89-2293c64d299a",
+			"name": "Get Task by ID",
+			"url": "http://localhost:5004/api/task/ae2298a8-13b0-4610-705d-08ddf544be3a",
+			"time": 7,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Response has task data": true,
+				"Task ID matches requested ID": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has task data": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Task ID matches requested ID": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				7
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Response has task data": true,
+					"Task ID matches requested ID": true
+				}
+			]
+		},
+		{
+			"id": "9e22c40d-cda0-4b65-93f4-eb50845036b5",
+			"name": "Update Task",
+			"url": "http://localhost:5004/api/task/ae2298a8-13b0-4610-705d-08ddf544be3a",
+			"time": 27,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Response has updated task data": true,
+				"Task ID matches requested ID": true,
+				"Updated at timestamp is recent": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has updated task data": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Task ID matches requested ID": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Updated at timestamp is recent": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				27
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Response has updated task data": true,
+					"Task ID matches requested ID": true,
+					"Updated at timestamp is recent": true
+				}
+			]
+		},
+		{
+			"id": "08cfecad-5eb2-46b3-a9f5-920e722996cd",
+			"name": "Update Task Status",
+			"url": "http://localhost:5004/api/task/ae2298a8-13b0-4610-705d-08ddf544be3a/status",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Response has task data": true,
+				"Status is valid TaskStatus enum value": true,
+				"Task ID matches requested ID": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has task data": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Status is valid TaskStatus enum value": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Task ID matches requested ID": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Response has task data": true,
+					"Status is valid TaskStatus enum value": true,
+					"Task ID matches requested ID": true
+				}
+			]
+		},
+		{
+			"id": "6f9f11f0-2fcb-4ceb-b864-69d74c8417cb",
+			"name": "Get Tasks by User ID",
+			"url": "http://localhost:5004/api/task/user/37c4015d-6e10-40c4-865d-fdb59d07b4eb",
+			"time": 9,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Response is an array": true,
+				"Tasks have required properties": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response is an array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Tasks have required properties": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				9
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Response is an array": true,
+					"Tasks have required properties": true
+				}
+			]
+		},
+		{
+			"id": "4fb4eb99-1bc5-4503-9733-72590675a741",
+			"name": "Assign Task to Users",
+			"url": "http://localhost:5004/api/task/ae2298a8-13b0-4610-705d-08ddf544be3a/assign",
+			"time": 24,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Response contains success message": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response contains success message": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				24
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Response contains success message": true
+				}
+			]
+		},
+		{
+			"id": "448419d9-634a-43d2-9601-56b5dc89e630",
+			"name": "Validate TaskStatus Enum",
+			"url": "http://localhost:5001/api/users/37c4015d-6e10-40c4-865d-fdb59d07b4eb",
+			"time": 24,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"TaskStatus enum values are correct": true
+			},
+			"testPassFailCounts": {
+				"TaskStatus enum values are correct": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				24
+			],
+			"allTests": [
+				{
+					"TaskStatus enum values are correct": true
+				}
+			]
+		},
+		{
+			"id": "55f0817b-03d4-4840-905f-1e2917b93fb7",
+			"name": "Validate TaskPriority Enum",
+			"url": "http://localhost:5001/api/users/37c4015d-6e10-40c4-865d-fdb59d07b4eb",
+			"time": 8,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"TaskPriority enum values are correct": true
+			},
+			"testPassFailCounts": {
+				"TaskPriority enum values are correct": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				8
+			],
+			"allTests": [
+				{
+					"TaskPriority enum values are correct": true
+				}
+			]
+		},
+		{
+			"id": "7a328c80-15b0-4c07-99de-bf72bcb25dc2",
+			"name": "Validate ConversationType Enum",
+			"url": "http://localhost:5001/api/users/37c4015d-6e10-40c4-865d-fdb59d07b4eb",
+			"time": 8,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"ConversationType enum values are correct": true
+			},
+			"testPassFailCounts": {
+				"ConversationType enum values are correct": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				8
+			],
+			"allTests": [
+				{
+					"ConversationType enum values are correct": true
+				}
+			]
+		},
+		{
+			"id": "1cac24e0-43c1-4102-8edb-a88fd2f461ed",
+			"name": "Validate MemberRole Enum",
+			"url": "http://localhost:5001/api/users/37c4015d-6e10-40c4-865d-fdb59d07b4eb",
+			"time": 8,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"MemberRole enum values are correct": true
+			},
+			"testPassFailCounts": {
+				"MemberRole enum values are correct": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				8
+			],
+			"allTests": [
+				{
+					"MemberRole enum values are correct": true
+				}
+			]
+		},
+		{
+			"id": "e039c957-add6-4798-9eaf-e48e5e75f979",
+			"name": "Full Workflow Test",
+			"url": "http://localhost:5001/api/users/37c4015d-6e10-40c4-865d-fdb59d07b4eb",
+			"time": 10,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"All IDs are valid GUIDs": true,
+				"Messaging workflow completed successfully": true,
+				"All services are working together": true
+			},
+			"testPassFailCounts": {
+				"All IDs are valid GUIDs": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Messaging workflow completed successfully": {
+					"pass": 1,
+					"fail": 0
+				},
+				"All services are working together": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				10
+			],
+			"allTests": [
+				{
+					"All IDs are valid GUIDs": true,
+					"Messaging workflow completed successfully": true,
+					"All services are working together": true
+				}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 3318,
+	"collection": {
+		"requests": [
+			{
+				"id": "6800f524-aaba-49dd-b67a-7cf302f331a5",
+				"method": "POST"
+			},
+			{
+				"id": "bf03f674-7ad2-4a1a-a2f2-6edfb88143b9",
+				"method": "POST"
+			},
+			{
+				"id": "fb947530-da8e-4023-833b-5696f5796f1b",
+				"method": "GET"
+			},
+			{
+				"id": "2a74b307-657b-4ff1-ada7-6aed55e1c938",
+				"method": "GET"
+			},
+			{
+				"id": "8f3824fe-c55b-4ee3-bcaa-d0e625acbab2",
+				"method": "POST"
+			},
+			{
+				"id": "296d20ec-c747-4608-b3c5-520cab547803",
+				"method": "GET"
+			},
+			{
+				"id": "d9005b32-1c37-4b2a-81a2-381a2bc1c5e2",
+				"method": "POST"
+			},
+			{
+				"id": "fe3199a8-158c-4206-981f-85c8cd488893",
+				"method": "POST"
+			},
+			{
+				"id": "72e0c0a6-dc8a-440f-999c-97c1878655ad",
+				"method": "GET"
+			},
+			{
+				"id": "0920e01b-974d-4d99-9601-a57961fb0e2f",
+				"method": "POST"
+			},
+			{
+				"id": "ec7b3ce5-181b-434e-b3ef-ba073d85638d",
+				"method": "POST"
+			},
+			{
+				"id": "7c09ad99-fcca-40bb-9aab-6a142f2e4846",
+				"method": "POST"
+			},
+			{
+				"id": "dd439cb0-0c7b-4388-a9f4-d2266dc058c7",
+				"method": "PUT"
+			},
+			{
+				"id": "6898ce70-c140-4407-b9b7-0a943dc3cc6d",
+				"method": "PUT"
+			},
+			{
+				"id": "9fc248ba-a70c-4d1a-b99e-9e526b6b45b1",
+				"method": "POST"
+			},
+			{
+				"id": "a5e88868-92a0-4276-bad9-21b3e883bdcc",
+				"method": "GET"
+			},
+			{
+				"id": "c36da3e7-259f-4caa-ab89-2293c64d299a",
+				"method": "GET"
+			},
+			{
+				"id": "9e22c40d-cda0-4b65-93f4-eb50845036b5",
+				"method": "PUT"
+			},
+			{
+				"id": "08cfecad-5eb2-46b3-a9f5-920e722996cd",
+				"method": "PUT"
+			},
+			{
+				"id": "6f9f11f0-2fcb-4ceb-b864-69d74c8417cb",
+				"method": "GET"
+			},
+			{
+				"id": "4fb4eb99-1bc5-4503-9733-72590675a741",
+				"method": "POST"
+			},
+			{
+				"id": "448419d9-634a-43d2-9601-56b5dc89e630",
+				"method": "GET"
+			},
+			{
+				"id": "55f0817b-03d4-4840-905f-1e2917b93fb7",
+				"method": "GET"
+			},
+			{
+				"id": "7a328c80-15b0-4c07-99de-bf72bcb25dc2",
+				"method": "GET"
+			},
+			{
+				"id": "1cac24e0-43c1-4102-8edb-a88fd2f461ed",
+				"method": "GET"
+			},
+			{
+				"id": "e039c957-add6-4798-9eaf-e48e5e75f979",
+				"method": "GET"
+			}
+		]
+	}
+}

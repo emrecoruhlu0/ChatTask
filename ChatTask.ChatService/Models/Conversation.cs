@@ -1,4 +1,5 @@
 using ChatTask.Shared.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChatTask.ChatService.Models;
 
@@ -25,6 +26,7 @@ public abstract class Conversation
     public abstract ConversationType GetConversationType();
     
     // Conversation üyelerini filtrele
+    [NotMapped]
     public IEnumerable<Member> ConversationMembers => 
         Members.Where(m => m.IsConversationMember);
 }

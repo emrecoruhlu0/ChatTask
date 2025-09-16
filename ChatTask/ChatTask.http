@@ -1,6 +1,0 @@
-@ChatTask_HostAddress = http://localhost:5017
-
-GET {{ChatTask_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

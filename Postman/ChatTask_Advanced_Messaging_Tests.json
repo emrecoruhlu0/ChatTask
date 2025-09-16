@@ -1,0 +1,1018 @@
+{
+	"info": {
+		"_postman_id": "chattask-advanced-messaging-tests",
+		"name": "ChatTask Advanced Messaging Tests",
+		"description": "Advanced messaging functionality tests for ChatTask microservices including DMs, Groups, Threads, and Message Management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Direct Message Tests",
+			"item": [
+				{
+					"name": "Create Direct Message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response has DM data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('workspaceId');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('type');",
+									"    pm.expect(responseJson).to.have.property('createdById');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"});",
+									"",
+									"pm.test('DM type is correct', function () {",
+									"    const responseJson = pm.response.json();",
+									"    // ConversationType: Channel=1, Group=2, DirectMessage=3, TaskGroup=4",
+									"    pm.expect(responseJson.type).to.equal(3); // DirectMessage = 3",
+									"});",
+									"",
+									"pm.test('Workspace ID matches test workspace', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testWorkspaceId = pm.globals.get('testWorkspaceId');",
+									"    pm.expect(responseJson.workspaceId).to.equal(testWorkspaceId);",
+									"});",
+									"",
+									"// Store DM ID for other tests",
+									"pm.globals.set('testDMId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{$randomFullName}} DM\",\n    \"description\": \"Direct message conversation\",\n    \"type\": 3,\n    \"isPrivate\": true,\n    \"createdById\": \"{{testUserId}}\",\n    \"workspaceId\": \"{{testWorkspaceId}}\",\n    \"participantIds\": [\"{{testUserId}}\"]\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/workspaces/{{testWorkspaceId}}/direct-messages",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"workspaces",
+								"{{testWorkspaceId}}",
+								"direct-messages"
+							]
+						}
+					}
+				},
+				{
+					"name": "Send Message to DM",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response has message data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('conversationId');",
+									"    pm.expect(responseJson).to.have.property('senderId');",
+									"    pm.expect(responseJson).to.have.property('content');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"    pm.expect(responseJson).to.have.property('isRead');",
+									"});",
+									"",
+									"pm.test('Message ID is valid GUID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);",
+									"});",
+									"",
+									"pm.test('Conversation ID matches test DM', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testDMId = pm.globals.get('testDMId');",
+									"    pm.expect(responseJson.conversationId).to.equal(testDMId);",
+									"});",
+									"",
+									"pm.test('Sender ID matches test user', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testUserId = pm.globals.get('testUserId');",
+									"    pm.expect(responseJson.senderId).to.equal(testUserId);",
+									"});",
+									"",
+									"// Store DM message ID for other tests",
+									"pm.globals.set('testDMMessageId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"conversationId\": \"{{testDMId}}\",\n    \"senderId\": \"{{testUserId}}\",\n    \"content\": \"DM: {{$randomLoremSentence}}\",\n    \"threadId\": null\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/messages",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"messages"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get DM Messages",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('DM messages have required properties', function () {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.length > 0) {",
+									"        const message = responseJson[0];",
+									"        pm.expect(message).to.have.property('id');",
+									"        pm.expect(message).to.have.property('conversationId');",
+									"        pm.expect(message).to.have.property('senderId');",
+									"        pm.expect(message).to.have.property('content');",
+									"        pm.expect(message).to.have.property('createdAt');",
+									"        pm.expect(message).to.have.property('isRead');",
+									"    }",
+									"});",
+									"",
+									"pm.test('At least one DM message exists', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.length).to.be.greaterThan(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/{{testDMId}}/messages?page=1&pageSize=10",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"{{testDMId}}",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Group Message Tests",
+			"item": [
+				{
+					"name": "Create Group",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response has group data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('workspaceId');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('type');",
+									"    pm.expect(responseJson).to.have.property('createdById');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"});",
+									"",
+									"pm.test('Group type is correct', function () {",
+									"    const responseJson = pm.response.json();",
+									"    // ConversationType: Channel=1, Group=2, DirectMessage=3, TaskGroup=4",
+									"    pm.expect(responseJson.type).to.equal(2); // Group = 2",
+									"});",
+									"",
+									"pm.test('Workspace ID matches test workspace', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testWorkspaceId = pm.globals.get('testWorkspaceId');",
+									"    pm.expect(responseJson.workspaceId).to.equal(testWorkspaceId);",
+									"});",
+									"",
+									"// Store group ID for other tests",
+									"pm.globals.set('testGroupId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{$randomWord}}-group\",\n    \"description\": \"{{$randomLoremSentence}}\",\n    \"type\": 2,\n    \"isPrivate\": false,\n    \"createdById\": \"{{testUserId}}\",\n    \"workspaceId\": \"{{testWorkspaceId}}\",\n    \"initialMemberIds\": [\"{{testUserId}}\"]\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/workspaces/{{testWorkspaceId}}/groups",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"workspaces",
+								"{{testWorkspaceId}}",
+								"groups"
+							]
+						}
+					}
+				},
+				{
+					"name": "Send Message to Group",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response has message data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('conversationId');",
+									"    pm.expect(responseJson).to.have.property('senderId');",
+									"    pm.expect(responseJson).to.have.property('content');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"    pm.expect(responseJson).to.have.property('isRead');",
+									"});",
+									"",
+									"pm.test('Message ID is valid GUID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);",
+									"});",
+									"",
+									"pm.test('Conversation ID matches test group', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testGroupId = pm.globals.get('testGroupId');",
+									"    pm.expect(responseJson.conversationId).to.equal(testGroupId);",
+									"});",
+									"",
+									"pm.test('Sender ID matches test user', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testUserId = pm.globals.get('testUserId');",
+									"    pm.expect(responseJson.senderId).to.equal(testUserId);",
+									"});",
+									"",
+									"// Store group message ID for other tests",
+									"pm.globals.set('testGroupMessageId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"conversationId\": \"{{testGroupId}}\",\n    \"senderId\": \"{{testUserId}}\",\n    \"content\": \"Group: {{$randomLoremSentence}}\",\n    \"threadId\": null\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/messages",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"messages"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Message Thread Tests",
+			"item": [
+				{
+					"name": "Create Message Thread",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response has message data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('conversationId');",
+									"    pm.expect(responseJson).to.have.property('senderId');",
+									"    pm.expect(responseJson).to.have.property('content');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"    pm.expect(responseJson).to.have.property('isRead');",
+									"    pm.expect(responseJson).to.have.property('threadId');",
+									"});",
+									"",
+									"pm.test('Message ID is valid GUID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);",
+									"});",
+									"",
+									"pm.test('Thread ID matches parent message', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testMessageId = pm.globals.get('testMessageId');",
+									"    pm.expect(responseJson.threadId).to.equal(testMessageId);",
+									"});",
+									"",
+									"pm.test('Conversation ID matches test channel', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const testChannelId = pm.globals.get('testChannelId');",
+									"    pm.expect(responseJson.conversationId).to.equal(testChannelId);",
+									"});",
+									"",
+									"// Store thread message ID for other tests",
+									"pm.globals.set('testThreadMessageId', pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"conversationId\": \"{{testChannelId}}\",\n    \"senderId\": \"{{testUserId}}\",\n    \"content\": \"Thread reply: {{$randomLoremSentence}}\",\n    \"threadId\": \"{{testMessageId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/messages",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"messages"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Message Threads",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('Thread messages have required properties', function () {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.length > 0) {",
+									"        const message = responseJson[0];",
+									"        pm.expect(message).to.have.property('id');",
+									"        pm.expect(message).to.have.property('conversationId');",
+									"        pm.expect(message).to.have.property('senderId');",
+									"        pm.expect(message).to.have.property('content');",
+									"        pm.expect(message).to.have.property('createdAt');",
+									"        pm.expect(message).to.have.property('threadId');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/{{testChannelId}}/messages/{{testMessageId}}/thread?page=1&pageSize=10",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"{{testChannelId}}",
+								"messages",
+								"{{testMessageId}}",
+								"thread"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Message Management Tests",
+			"item": [
+				{
+					"name": "Edit Message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has updated message data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('conversationId');",
+									"    pm.expect(responseJson).to.have.property('senderId');",
+									"    pm.expect(responseJson).to.have.property('content');",
+									"    pm.expect(responseJson).to.have.property('createdAt');",
+									"    pm.expect(responseJson).to.have.property('updatedAt');",
+									"    pm.expect(responseJson).to.have.property('isRead');",
+									"});",
+									"",
+									"pm.test('Message ID matches requested ID', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const requestedId = pm.globals.get('testMessageId');",
+									"    pm.expect(responseJson.id).to.equal(requestedId);",
+									"});",
+									"",
+									"pm.test('Content is updated', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.content).to.include('EDITED');",
+									"});",
+									"",
+									"pm.test('Updated at timestamp is recent', function () {",
+									"    const responseJson = pm.response.json();",
+									"    const updatedAt = new Date(responseJson.updatedAt);",
+									"    const now = new Date();",
+									"    const diffMinutes = (now - updatedAt) / (1000 * 60);",
+									"    pm.expect(diffMinutes).to.be.lessThan(5);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"EDITED: {{$randomLoremSentence}}\",\n    \"editedById\": \"{{testUserId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/messages/{{testMessageId}}",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"messages",
+								"{{testMessageId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Message",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains success message', function () {",
+									"    const responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include('silindi');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/messages/{{testThreadMessageId}}?deletedById={{testUserId}}",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"messages",
+								"{{testThreadMessageId}}"
+							],
+							"query": [
+								{
+									"key": "deletedById",
+									"value": "{{testUserId}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Mark Message as Read",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains success message', function () {",
+									"    const responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include('okundu');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{testUserId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/messages/{{testMessageId}}/read",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"messages",
+								"{{testMessageId}}",
+								"read"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Conversation Member Tests",
+			"item": [
+				{
+					"name": "Get Conversation Members",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('Members have required properties', function () {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.length > 0) {",
+									"        const member = responseJson[0];",
+									"        pm.expect(member).to.have.property('userId');",
+									"        pm.expect(member).to.have.property('parentId');",
+									"        pm.expect(member).to.have.property('parentType');",
+									"        pm.expect(member).to.have.property('role');",
+									"        pm.expect(member).to.have.property('joinedAt');",
+									"        pm.expect(member).to.have.property('isActive');",
+									"    }",
+									"});",
+									"",
+									"pm.test('At least one member exists', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.length).to.be.greaterThan(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/{{testChannelId}}/members",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"{{testChannelId}}",
+								"members"
+							]
+						}
+					}
+				},
+				{
+					"name": "Add Member to Conversation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response contains success message', function () {",
+									"    const responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include('eklendi');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{testUserId}}\",\n    \"parentId\": \"{{testChannelId}}\",\n    \"parentType\": 2,\n    \"role\": 3,\n    \"addedById\": \"{{testUserId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/{{testChannelId}}/members",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"{{testChannelId}}",
+								"members"
+							]
+						}
+					}
+				},
+				{
+					"name": "Remove Member from Conversation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains success message', function () {",
+									"    const responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include('çıkarıldı');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/{{testChannelId}}/members/{{testUserId}}?removedById={{testUserId}}",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"{{testChannelId}}",
+								"members",
+								"{{testUserId}}"
+							],
+							"query": [
+								{
+									"key": "removedById",
+									"value": "{{testUserId}}"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Advanced Message Features",
+			"item": [
+				{
+					"name": "Search Messages",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('Search results have required properties', function () {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.length > 0) {",
+									"        const message = responseJson[0];",
+									"        pm.expect(message).to.have.property('id');",
+									"        pm.expect(message).to.have.property('conversationId');",
+									"        pm.expect(message).to.have.property('senderId');",
+									"        pm.expect(message).to.have.property('content');",
+									"        pm.expect(message).to.have.property('createdAt');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/{{testChannelId}}/messages/search?query=test&page=1&pageSize=10",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"{{testChannelId}}",
+								"messages",
+								"search"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "test"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Unread Message Count",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has unread count', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('unreadCount');",
+									"    pm.expect(responseJson.unreadCount).to.be.a('number');",
+									"    pm.expect(responseJson.unreadCount).to.be.at.least(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/{{testChannelId}}/messages/unread-count?userId={{testUserId}}",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"{{testChannelId}}",
+								"messages",
+								"unread-count"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "{{testUserId}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Mark All Messages as Read",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains success message', function () {",
+									"    const responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include('okundu');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{testUserId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{chatServiceUrl}}/api/conversations/{{testChannelId}}/messages/mark-all-read",
+							"host": [
+								"{{chatServiceUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"{{testChannelId}}",
+								"messages",
+								"mark-all-read"
+							]
+						}
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Generate random data for each request",
+					"pm.globals.set('randomName', pm.variables.replaceIn('{{$randomFullName}}'));",
+					"pm.globals.set('randomEmail', pm.variables.replaceIn('{{$randomEmail}}'));",
+					"pm.globals.set('randomPassword', pm.variables.replaceIn('{{$randomPassword}}'));",
+					"pm.globals.set('randomCompany', pm.variables.replaceIn('{{$randomCompanyName}}'));",
+					"pm.globals.set('randomSentence', pm.variables.replaceIn('{{$randomLoremSentence}}'));",
+					"pm.globals.set('randomWords', pm.variables.replaceIn('{{$randomLoremWords}}'));",
+					"pm.globals.set('randomParagraph', pm.variables.replaceIn('{{$randomLoremParagraph}}'));",
+					"pm.globals.set('randomWord', pm.variables.replaceIn('{{$randomWord}}'));",
+					"pm.globals.set('randomInt', pm.variables.replaceIn('{{$randomInt}}'));",
+					"pm.globals.set('isoTimestamp', pm.variables.replaceIn('{{$isoTimestamp}}'));"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "userServiceUrl",
+			"value": "http://localhost:5001",
+			"type": "string"
+		},
+		{
+			"key": "chatServiceUrl",
+			"value": "http://localhost:5002",
+			"type": "string"
+		},
+		{
+			"key": "taskServiceUrl",
+			"value": "http://localhost:5004",
+			"type": "string"
+		},
+		{
+			"key": "authServiceUrl",
+			"value": "http://localhost:5003",
+			"type": "string"
+		}
+	]
+}

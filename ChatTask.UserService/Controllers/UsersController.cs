@@ -15,11 +15,13 @@ public class UsersController : ControllerBase
 {
     private readonly UserDbContext _context;
     private readonly UserMappingService _mappingService;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public UsersController(UserDbContext context, UserMappingService mappingService)
+    public UsersController(UserDbContext context, UserMappingService mappingService, IHttpClientFactory httpClientFactory)
     {
         _context = context;
         _mappingService = mappingService;
+        _httpClientFactory = httpClientFactory;
     }
 
     [HttpPost("register")]
@@ -199,6 +201,24 @@ public class UsersController : ControllerBase
                     Code = "INVALID_CREDENTIALS",
                     Field = "password"
                 });
+            }
+
+            // ChatService'e kullanıcı login bilgisini gönder
+            try
+            {
+                var httpClient = _httpClientFactory.CreateClient();
+                var chatServiceUrl = "http://chattask-chatservice:5002"; // Docker service name
+                var response = await httpClient.PostAsync(
+                    $"{chatServiceUrl}/api/conversations/users/{user.Id}/login", 
+                    null, 
+                    cancellationToken);
+                
+                Console.WriteLine($"ChatService notification: {response.StatusCode}");
+            }
+            catch (Exception ex)
+            {
+                // ChatService fail olsa bile login başarılı olsun
+                Console.WriteLine($"ChatService notification failed: {ex.Message}");
             }
 
             return Ok(new UserDto

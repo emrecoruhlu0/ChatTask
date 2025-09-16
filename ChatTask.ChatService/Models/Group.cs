@@ -10,7 +10,7 @@ public class Group : Conversation
     public override bool CanUserJoin(Guid userId)
     {
         // Group'a sadece davet ile katılım
-        return Members.Any(m => m.GetUserId() == userId);
+        return Members.Any(m => m.UserId == userId);
     }
     
     public override string GetDisplayName()

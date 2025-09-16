@@ -24,20 +24,6 @@ public class ChatDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Conversation inheritance - Table Per Hierarchy (TPH)
-        modelBuilder.Entity<Conversation>()
-            .HasDiscriminator<ConversationType>("Type")
-            .HasValue<Channel>(ConversationType.Channel)
-            .HasValue<Group>(ConversationType.Group)
-            .HasValue<DirectMessage>(ConversationType.DirectMessage)
-            .HasValue<TaskGroup>(ConversationType.TaskGroup);
-
-        // Conversation foreign key configuration - Explicit navigation property ile
-        modelBuilder.Entity<Conversation>()
-            .HasOne(c => c.Workspace)
-            .WithMany(w => w.Conversations)
-            .HasForeignKey(c => c.WorkspaceId)
-            .OnDelete(DeleteBehavior.NoAction);
 
         // Workspace configuration
         modelBuilder.Entity<Workspace>(entity =>
@@ -48,14 +34,39 @@ public class ChatDbContext : DbContext
             entity.HasIndex(e => e.Domain).IsUnique();
         });
 
-        // Conversation configuration
+
+        // Conversation configuration - TPH inheritance
         modelBuilder.Entity<Conversation>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.WorkspaceId).IsRequired();
             entity.HasIndex(e => new { e.WorkspaceId, e.Name });
+            
+            // TPH inheritance configuration
+            entity.HasDiscriminator(e => e.Type)
+                .HasValue<Channel>(ConversationType.Channel)
+                .HasValue<Group>(ConversationType.Group)
+                .HasValue<DirectMessage>(ConversationType.DirectMessage)
+                .HasValue<TaskGroup>(ConversationType.TaskGroup);
+                
+            // Conversation-Workspace relationship (TPH içinde)
+            entity.HasOne(c => c.Workspace)
+                .WithMany(w => w.Conversations)
+                .HasForeignKey(c => c.WorkspaceId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
+
+        // Shadow property'leri ignore et
+        modelBuilder.Entity<Channel>().Ignore("WorkspaceId1");
+        modelBuilder.Entity<Group>().Ignore("WorkspaceId2");
+        modelBuilder.Entity<DirectMessage>().Ignore("WorkspaceId2");
+        modelBuilder.Entity<TaskGroup>().Ignore("WorkspaceId2");
+        modelBuilder.Entity<Group>().Ignore("Group_WorkspaceId2");
+        modelBuilder.Entity<TaskGroup>().Ignore("TaskGroup_WorkspaceId2");
+
+
 
         // Message configuration
         modelBuilder.Entity<Message>(entity =>
@@ -70,26 +81,24 @@ public class ChatDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Member configuration
+        // Member configuration - Composite Key Only (No FK relationships)
         modelBuilder.Entity<Member>(entity =>
         {
-            entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.Id).IsUnique();
-            entity.HasIndex(e => new { e.UserId, e.ParentId }).IsUnique();
+            // Composite Key: UserId + ParentId + ParentType
+            entity.HasKey(e => new { e.UserId, e.ParentId, e.ParentType });
             
-            // User referansı yok - UserService'den DTO ile alınır
-                
-            entity.HasOne(e => e.Workspace)
-                .WithMany(w => w.Members)
-                .HasForeignKey(e => e.ParentId)
-                .OnDelete(DeleteBehavior.NoAction)
-                .IsRequired(false);
-                
-            entity.HasOne(e => e.Conversation)
-                .WithMany(c => c.Members)
-                .HasForeignKey(e => e.ParentId)
-                .OnDelete(DeleteBehavior.NoAction)
-                .IsRequired(false);
+            // Indexes for performance
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.ParentId);
+            entity.HasIndex(e => new { e.ParentId, e.ParentType });
+            entity.HasIndex(e => new { e.UserId, e.ParentType });
+            
+            // Explicitly ignore all navigation properties to prevent FK inference
+            entity.Ignore(e => e.Workspace);
+            entity.Ignore(e => e.Conversation);
+            
+            // No foreign key relationships at all - pure composite key entity
+            // This prevents EF Core from trying to infer relationships
         });
 
     }
