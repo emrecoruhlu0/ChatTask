@@ -12,6 +12,8 @@ public class ProjectTask // Task yerine ProjectTask kullan
     public DateTime DueDate { get; set; } = DateTime.UtcNow.AddDays(7);
     public ChatTask.Shared.Enums.TaskStatus Status { get; set; } = ChatTask.Shared.Enums.TaskStatus.Pending;
     public TaskPriority Priority { get; set; } = TaskPriority.Medium;
+    public bool IsPrivate { get; set; } = false;
+    public Guid CreatedById { get; set; } // Task'ı oluşturan kişi
     
     // Çoklu atama desteği
     public Guid? TaskGroupId { get; set; }

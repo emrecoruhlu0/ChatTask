@@ -17,7 +17,6 @@ public abstract class Conversation
     // ORTAK ÖZELLİKLER - Tek liste
     public List<Member> Members { get; set; } = new();
     public List<Message> Messages { get; set; } = new();
-    public bool IsPrivate { get; set; }
     public bool IsArchived { get; set; }
     
     // ABSTRACT METODLAR - Alt sınıflar implement etmeli

@@ -35,10 +35,40 @@ export interface Conversation {
   id: string;
   name: string;
   description: string;
-  type: 'Channel' | 'DirectMessage' | 'Group';
-  isPrivate: boolean;
+  type: 'Channel' | 'DirectMessage' | 'Group' | 'TaskGroup';
   memberCount: number;
   lastMessage: string;
+  createdById: string;
+  isPublic?: boolean; // Channel için
+}
+
+// Member Types
+export interface ConversationMember {
+  userId: string;
+  name: string;
+  email: string;
+  avatar: string;
+  role: 'Owner' | 'Admin' | 'Member';
+  joinedAt: string;
+  isCurrentUser: boolean;
+  canChangeRole: boolean;
+}
+
+// Role Types
+export type MemberRole = 'Owner' | 'Admin' | 'Member';
+
+// Create Request Types
+export interface CreateDirectMessageDto {
+  name: string;
+  description: string;
+  workspaceId: string;
+  participantIds: string[];
+}
+
+// Role Change Types
+export interface ChangeRoleDto {
+  requestedBy: string;
+  role: MemberRole;
 }
 
 // Message Types
@@ -69,6 +99,8 @@ export interface Task {
   createdAt: string;
   updatedAt: string;
   dueDate: string;
+  isPrivate: boolean;
+  createdById: string;
   taskGroupId?: string;
   assignmentCount: number;
   assignments: TaskAssignment[];
@@ -86,13 +118,16 @@ export interface CreateTaskRequest {
   status: TaskStatus;
   priority: TaskPriority;
   dueDate: string;
+  isPrivate: boolean;
+  createdById: string;
   taskGroupId?: string;
-  assigneeIds?: string[];
+  channelId?: string;
+  AssigneeIds?: string[];
 }
 
 // Enums
-export type TaskStatus = 'New' | 'InProgress' | 'Done';
-export type TaskPriority = 'Low' | 'Medium' | 'High' | 'Urgent';
+export type TaskStatus = 'Pending' | 'InProgress' | 'Completed' | 'Cancelled' | 'OnHold';
+export type TaskPriority = 'Low' | 'Medium' | 'High' | 'Critical';
 
 // API Response Types
 export interface ApiResponse<T> {
@@ -110,13 +145,7 @@ export interface PaginatedResponse<T> {
   hasPrevious: boolean;
 }
 
-// DTO Types
-export interface CreateDirectMessageDto {
-  name: string;
-  description: string;
-  isPrivate: boolean;
-  participantIds: string[];
-}
+// DTO Types (duplicate removed)
 
 export interface MarkMessageAsReadDto {
   userId: string;

@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User, Workspace, Conversation, Message, Task } from '../types';
+import { authService } from '../services/auth';
+import { signalRService } from '../services/signalr';
 
 interface AppState {
   // User state
@@ -49,9 +51,23 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
-      // Initial state
-      user: null,
-      isAuthenticated: false,
+      // Initial state - localStorage'dan user bilgisini yükle
+      user: (() => {
+        try {
+          const storedUser = localStorage.getItem('user');
+          return storedUser ? JSON.parse(storedUser) : null;
+        } catch {
+          return null;
+        }
+      })(),
+      isAuthenticated: (() => {
+        try {
+          const storedUser = localStorage.getItem('user');
+          return !!storedUser;
+        } catch {
+          return false;
+        }
+      })(),
       workspaces: [],
       currentWorkspace: null,
       currentConversation: null,
@@ -126,23 +142,60 @@ export const useAppStore = create<AppState>()(
       setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
       setActiveView: (view) => set({ activeView: view }),
 
-      logout: () => set({
-        user: null,
-        isAuthenticated: false,
-        workspaces: [],
-        currentWorkspace: null,
-        currentConversation: null,
-        messages: [],
-        tasks: [],
-        userTasks: [],
-        activeView: 'chat'
-      }),
+      logout: async () => {
+        try {
+          // SignalR bağlantısını kapat
+          await signalRService.disconnect();
+          
+          // localStorage'dan kullanıcı bilgilerini temizle
+          authService.logout();
+          
+          // Zustand store'u da temizle
+          localStorage.removeItem('app-storage');
+          
+          // Store'u sıfırla
+          set({
+            user: null,
+            isAuthenticated: false,
+            workspaces: [],
+            currentWorkspace: null,
+            currentConversation: null,
+            messages: [],
+            tasks: [],
+            userTasks: [],
+            activeView: 'chat'
+          });
+        } catch (error) {
+          console.error('Logout error:', error);
+          // Hata olsa bile her şeyi temizle
+          authService.logout();
+          localStorage.removeItem('app-storage');
+          set({
+            user: null,
+            isAuthenticated: false,
+            workspaces: [],
+            currentWorkspace: null,
+            currentConversation: null,
+            messages: [],
+            tasks: [],
+            userTasks: [],
+            activeView: 'chat'
+          });
+        }
+      },
     }),
     {
       name: 'app-storage',
       partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
+        // Sadece user null değilse kaydet (logout durumunda kaydetme)
+        ...(state.user && {
+          user: state.user,
+          isAuthenticated: state.isAuthenticated,
+          currentWorkspace: state.currentWorkspace,
+          currentConversation: state.currentConversation,
+          workspaces: state.workspaces,
+        }),
+        // UI ayarları her zaman kaydet
         sidebarCollapsed: state.sidebarCollapsed,
         activeView: state.activeView,
       }),

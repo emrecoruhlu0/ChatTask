@@ -11,7 +11,6 @@ public class ConversationDto
     public ConversationType Type { get; set; }
     public Guid CreatedById { get; set; }
     public DateTime CreatedAt { get; set; }
-    public bool IsPrivate { get; set; }
     public bool IsArchived { get; set; }
     public int MemberCount { get; set; }
     public int MessageCount { get; set; }

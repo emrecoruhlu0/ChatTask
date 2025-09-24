@@ -12,6 +12,8 @@ public class TaskDto
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public DateTime DueDate { get; set; }
+    public bool IsPrivate { get; set; }
+    public Guid CreatedById { get; set; }
     public Guid? TaskGroupId { get; set; }
     public int AssignmentCount { get; set; }
     public List<TaskAssignmentDto> Assignments { get; set; } = new();

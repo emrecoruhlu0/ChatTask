@@ -4,9 +4,7 @@ namespace ChatTask.Shared.DTOs;
 
 public class CreateMemberDto
 {
-    public Guid UserId { get; set; }
-    public Guid ParentId { get; set; }
-    public ParentType ParentType { get; set; }
-    public MemberRole Role { get; set; }
-    public Guid AddedById { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public string AddedById { get; set; } = string.Empty;
+    public string Role { get; set; } = "Member";
 }

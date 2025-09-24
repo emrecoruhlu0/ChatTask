@@ -212,6 +212,32 @@ public class ChatHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
+    public async Task JoinGroup(string groupId)
+    {
+        try
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, groupId);
+            Console.WriteLine($"Connection {Context.ConnectionId} joined group {groupId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"JoinGroup Error: {ex.Message}");
+        }
+    }
+
+    public async Task LeaveGroup(string groupId)
+    {
+        try
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupId);
+            Console.WriteLine($"Connection {Context.ConnectionId} left group {groupId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"LeaveGroup Error: {ex.Message}");
+        }
+    }
+
     public async Task<object> GetOnlineUsers()
     {
         try

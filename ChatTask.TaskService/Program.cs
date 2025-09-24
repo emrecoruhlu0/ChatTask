@@ -34,6 +34,7 @@ builder.Services.AddSwaggerGen();
 
 // Register services
 builder.Services.AddScoped<TaskMappingService>();
+builder.Services.AddHttpClient();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -48,6 +49,21 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Database'i oluştur
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<TaskDbContext>();
+    try
+    {
+        context.Database.EnsureCreated();
+        Console.WriteLine("[TaskService] Database created successfully");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[TaskService] Database creation error: {ex.Message}");
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -55,8 +71,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 app.UseCors();
+app.UseHttpsRedirection();
 // app.UseAuthentication(); // Geçici olarak devre dışı
 // app.UseAuthorization(); // Geçici olarak devre dışı
 app.MapControllers();

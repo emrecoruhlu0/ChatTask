@@ -49,7 +49,6 @@ public class ChatMappingService
             Type = conversation.Type,
             CreatedById = conversation.CreatedById,
             CreatedAt = conversation.CreatedAt,
-            IsPrivate = conversation.IsPrivate,
             IsArchived = conversation.IsArchived,
             MemberCount = conversation.Members.Count,
             MessageCount = conversation.Messages.Count
@@ -70,7 +69,6 @@ public class ChatMappingService
                 Type = dto.Type,
                 CreatedById = dto.CreatedById,
                 CreatedAt = DateTime.UtcNow,
-                IsPrivate = dto.IsPrivate,
                 IsArchived = false
             },
             Shared.Enums.ConversationType.Group => new Group
@@ -82,7 +80,6 @@ public class ChatMappingService
                 Type = dto.Type,
                 CreatedById = dto.CreatedById,
                 CreatedAt = DateTime.UtcNow,
-                IsPrivate = dto.IsPrivate,
                 IsArchived = false
             },
             Shared.Enums.ConversationType.DirectMessage => new DirectMessage
@@ -94,7 +91,6 @@ public class ChatMappingService
                 Type = dto.Type,
                 CreatedById = dto.CreatedById,
                 CreatedAt = DateTime.UtcNow,
-                IsPrivate = dto.IsPrivate,
                 IsArchived = false
             },
             Shared.Enums.ConversationType.TaskGroup => new TaskGroup
@@ -106,7 +102,6 @@ public class ChatMappingService
                 Type = dto.Type,
                 CreatedById = dto.CreatedById,
                 CreatedAt = DateTime.UtcNow,
-                IsPrivate = dto.IsPrivate,
                 IsArchived = false,
                 TaskCount = 0
             },
@@ -128,15 +123,15 @@ public class ChatMappingService
         };
     }
 
-    // Member DTO → Model
-    public Member ToMemberModel(CreateMemberDto dto)
+    // Member DTO → Model (Artık kullanılmıyor - controller'da manuel oluşturuluyor)
+    public Member ToMemberModel(CreateMemberDto dto, Guid parentId, ChatTask.Shared.Enums.ParentType parentType)
     {
         return new Member
         {
-            UserId = dto.UserId,
-            ParentId = dto.ParentId,
-            ParentType = dto.ParentType,
-            Role = dto.Role,
+            UserId = Guid.Parse(dto.UserId),
+            ParentId = parentId,
+            ParentType = parentType,
+            Role = Enum.TryParse<ChatTask.Shared.Enums.MemberRole>(dto.Role, out var role) ? role : ChatTask.Shared.Enums.MemberRole.Member,
             JoinedAt = DateTime.UtcNow,
             IsActive = true
         };

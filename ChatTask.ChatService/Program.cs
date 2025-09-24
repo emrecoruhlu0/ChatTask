@@ -16,7 +16,13 @@ builder.Services.AddSwaggerGen();
 // Database
 builder.Services.AddDbContext<ChatDbContext>(options =>
     options
-        .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 3,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null);
+        })
         .EnableSensitiveDataLogging()
         .LogTo(Console.WriteLine, LogLevel.Information));
 
@@ -29,6 +35,7 @@ builder.Services.AddHttpClient<IUserService, UserService>(client =>
 
 // Services
 builder.Services.AddScoped<ChatMappingService>();
+builder.Services.AddScoped<RoleBasedFilteringService>();
 
 // SignalR
 builder.Services.AddSignalR();
@@ -38,9 +45,10 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:8080")
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 

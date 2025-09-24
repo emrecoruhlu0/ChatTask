@@ -4,13 +4,13 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY ChatTask.Frontend/package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm install
 
 # Copy source code
-COPY . .
+COPY ChatTask.Frontend/ .
 
 # Build the application
 RUN npm run build
@@ -22,7 +22,7 @@ FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY ChatTask.Frontend/nginx.conf /etc/nginx/nginx.conf
 
 # Expose port 80
 EXPOSE 80

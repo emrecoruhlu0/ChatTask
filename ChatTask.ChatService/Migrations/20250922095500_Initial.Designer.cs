@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatTask.ChatService.Migrations
 {
     [DbContext(typeof(ChatDbContext))]
-    [Migration("20250914124225_Initial")]
+    [Migration("20250922095500_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -43,9 +43,6 @@ namespace ChatTask.ChatService.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsArchived")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPrivate")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
@@ -182,6 +179,9 @@ namespace ChatTask.ChatService.Migrations
                     b.HasBaseType("ChatTask.ChatService.Models.Conversation");
 
                     b.Property<bool>("AutoAddNewMembers")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
 
                     b.Property<int>("Purpose")

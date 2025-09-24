@@ -18,6 +18,8 @@ public class TaskMappingService
             CreatedAt = task.CreatedAt,
             UpdatedAt = task.UpdatedAt,
             DueDate = task.DueDate,
+            IsPrivate = task.IsPrivate,
+            CreatedById = task.CreatedById,
             TaskGroupId = task.TaskGroupId,
             AssignmentCount = task.Assignments.Count,
             Assignments = task.Assignments.Select(ToTaskAssignmentDto).ToList()
@@ -32,9 +34,11 @@ public class TaskMappingService
             Id = Guid.NewGuid(),
             Title = dto.Title,
             Description = dto.Description,
-            Status = dto.Status,
-            Priority = dto.Priority,
+            Status = Enum.Parse<ChatTask.Shared.Enums.TaskStatus>(dto.Status),
+            Priority = Enum.Parse<ChatTask.Shared.Enums.TaskPriority>(dto.Priority),
             DueDate = dto.DueDate,
+            IsPrivate = dto.IsPrivate,
+            CreatedById = Guid.Parse(dto.CreatedById), // String'i Guid'e çevir
             TaskGroupId = dto.TaskGroupId,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

@@ -1,0 +1,621 @@
+{
+  "info": {
+    "name": "ChatTask - Hazır Veri Oluşturma",
+    "description": "ChatTask projesi için tüm veri tiplerini oluşturan Postman collection'ı. Her çalıştırmada rastgele veriler oluşturur.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Kullanıcı İşlemleri",
+      "item": [
+        {
+          "name": "Kullanıcı Kaydı - Admin",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Rastgele admin adı oluştur",
+                  "const adminNames = ['admin', 'administrator', 'superuser', 'root', 'master', 'chief', 'boss', 'leader'];",
+                  "const randomAdminName = adminNames[Math.floor(Math.random() * adminNames.length)];",
+                  "const timestamp = Date.now();",
+                  "const randomSuffix = Math.floor(Math.random() * 1000);",
+                  "const uniqueSuffix = timestamp.toString().slice(-6) + randomSuffix;",
+                  "pm.environment.set('adminName', randomAdminName + uniqueSuffix);",
+                  "",
+                  "// Rastgele admin email oluştur",
+                  "const adminEmails = ['admin', 'administrator', 'superuser', 'root', 'master', 'chief', 'boss', 'leader'];",
+                  "const randomAdminEmail = adminEmails[Math.floor(Math.random() * adminEmails.length)];",
+                  "pm.environment.set('adminEmail', randomAdminEmail + uniqueSuffix + '@example.com');",
+                  "",
+                  "// Rastgele admin şifre oluştur",
+                  "const adminPasswords = ['Admin123!', 'SuperPass456', 'Master789!', 'ChiefPass123', 'Boss456!', 'Leader789!', 'RootPass123', 'AdminPass456!'];",
+                  "const randomAdminPassword = adminPasswords[Math.floor(Math.random() * adminPasswords.length)];",
+                  "pm.environment.set('adminPassword', randomAdminPassword);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Admin user created successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('adminUserId', jsonData.id);",
+                  "    console.log('Admin User ID saved:', jsonData.id);",
+                  "});",
+                  "",
+                  "// 409 Conflict durumunda mevcut kullanıcıyı al",
+                  "if (pm.response.code === 409) {",
+                  "    console.log('User already exists, getting existing user...');",
+                  "    pm.sendRequest({",
+                  "        url: pm.environment.get('baseUrl') + ':' + pm.environment.get('userServicePort') + '/api/users',",
+                  "        method: 'GET'",
+                  "    }, function (err, response) {",
+                  "        if (response && response.json()) {",
+                  "            var users = response.json();",
+                  "            var adminUser = users.find(u => u.name.includes('admin') || u.name.includes('administrator') || u.name.includes('superuser'));",
+                  "            if (adminUser) {",
+                  "                pm.environment.set('adminUserId', adminUser.id);",
+                  "                console.log('Existing Admin User ID saved:', adminUser.id);",
+                  "            }",
+                  "        }",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{adminName}}\",\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}:{{userServicePort}}/api/users/register",
+              "host": ["{{baseUrl}}"],
+              "port": "{{userServicePort}}",
+              "path": ["api", "users", "register"]
+            }
+          }
+        },
+        {
+          "name": "Kullanıcı Kaydı - Developer 1",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Rastgele developer 1 adı oluştur",
+                  "const dev1Names = ['alex', 'sam', 'mike', 'jordan', 'taylor', 'casey', 'riley', 'jamie'];",
+                  "const randomDev1Name = dev1Names[Math.floor(Math.random() * dev1Names.length)];",
+                  "const timestamp = Date.now();",
+                  "const randomSuffix = Math.floor(Math.random() * 1000);",
+                  "const uniqueSuffix = timestamp.toString().slice(-6) + randomSuffix;",
+                  "pm.environment.set('dev1Name', randomDev1Name + uniqueSuffix);",
+                  "",
+                  "// Rastgele developer 1 email oluştur",
+                  "const dev1Emails = ['alex', 'sam', 'mike', 'jordan', 'taylor', 'casey', 'riley', 'jamie'];",
+                  "const randomDev1Email = dev1Emails[Math.floor(Math.random() * dev1Emails.length)];",
+                  "pm.environment.set('dev1Email', randomDev1Email + uniqueSuffix + '@example.com');",
+                  "",
+                  "// Rastgele developer 1 şifre oluştur",
+                  "const dev1Passwords = ['Dev123!', 'Code456!', 'Tech789!', 'Prog123!', 'DevPass456!', 'CodePass789!', 'TechPass123!', 'ProgPass456!'];",
+                  "const randomDev1Password = dev1Passwords[Math.floor(Math.random() * dev1Passwords.length)];",
+                  "pm.environment.set('dev1Password', randomDev1Password);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Developer 1 user created successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('dev1UserId', jsonData.id);",
+                  "    console.log('Dev1 User ID saved:', jsonData.id);",
+                  "});",
+                  "",
+                  "// 409 Conflict durumunda mevcut kullanıcıyı al",
+                  "if (pm.response.code === 409) {",
+                  "    console.log('Dev1 user already exists, getting existing user...');",
+                  "    pm.sendRequest({",
+                  "        url: pm.environment.get('baseUrl') + ':' + pm.environment.get('userServicePort') + '/api/users',",
+                  "        method: 'GET'",
+                  "    }, function (err, response) {",
+                  "        if (response && response.json()) {",
+                  "            var users = response.json();",
+                  "            var dev1User = users.find(u => u.name.includes('alex') || u.name.includes('sam') || u.name.includes('mike') || u.name.includes('jordan'));",
+                  "            if (dev1User) {",
+                  "                pm.environment.set('dev1UserId', dev1User.id);",
+                  "                console.log('Existing Dev1 User ID saved:', dev1User.id);",
+                  "            }",
+                  "        }",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{dev1Name}}\",\n  \"email\": \"{{dev1Email}}\",\n  \"password\": \"{{dev1Password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}:{{userServicePort}}/api/users/register",
+              "host": ["{{baseUrl}}"],
+              "port": "{{userServicePort}}",
+              "path": ["api", "users", "register"]
+            }
+          }
+        },
+        {
+          "name": "Kullanıcı Kaydı - Developer 2",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Rastgele developer 2 adı oluştur",
+                  "const dev2Names = ['chris', 'pat', 'blake', 'morgan', 'quinn', 'sage', 'river', 'skyler'];",
+                  "const randomDev2Name = dev2Names[Math.floor(Math.random() * dev2Names.length)];",
+                  "const timestamp = Date.now();",
+                  "const randomSuffix = Math.floor(Math.random() * 1000);",
+                  "const uniqueSuffix = timestamp.toString().slice(-6) + randomSuffix;",
+                  "pm.environment.set('dev2Name', randomDev2Name + uniqueSuffix);",
+                  "",
+                  "// Rastgele developer 2 email oluştur",
+                  "const dev2Emails = ['chris', 'pat', 'blake', 'morgan', 'quinn', 'sage', 'river', 'skyler'];",
+                  "const randomDev2Email = dev2Emails[Math.floor(Math.random() * dev2Emails.length)];",
+                  "pm.environment.set('dev2Email', randomDev2Email + uniqueSuffix + '@example.com');",
+                  "",
+                  "// Rastgele developer 2 şifre oluştur",
+                  "const dev2Passwords = ['Dev123!', 'Code456!', 'Tech789!', 'Prog123!', 'DevPass456!', 'CodePass789!', 'TechPass123!', 'ProgPass456!'];",
+                  "const randomDev2Password = dev2Passwords[Math.floor(Math.random() * dev2Passwords.length)];",
+                  "pm.environment.set('dev2Password', randomDev2Password);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Developer 2 user created successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('dev2UserId', jsonData.id);",
+                  "    console.log('Dev2 User ID saved:', jsonData.id);",
+                  "});",
+                  "",
+                  "// 409 Conflict durumunda mevcut kullanıcıyı al",
+                  "if (pm.response.code === 409) {",
+                  "    console.log('Dev2 user already exists, getting existing user...');",
+                  "    pm.sendRequest({",
+                  "        url: pm.environment.get('baseUrl') + ':' + pm.environment.get('userServicePort') + '/api/users',",
+                  "        method: 'GET'",
+                  "    }, function (err, response) {",
+                  "        if (response && response.json()) {",
+                  "            var users = response.json();",
+                  "            var dev2User = users.find(u => u.name.includes('chris') || u.name.includes('pat') || u.name.includes('blake') || u.name.includes('morgan'));",
+                  "            if (dev2User) {",
+                  "                pm.environment.set('dev2UserId', dev2User.id);",
+                  "                console.log('Existing Dev2 User ID saved:', dev2User.id);",
+                  "            }",
+                  "        }",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{dev2Name}}\",\n  \"email\": \"{{dev2Email}}\",\n  \"password\": \"{{dev2Password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}:{{userServicePort}}/api/users/register",
+              "host": ["{{baseUrl}}"],
+              "port": "{{userServicePort}}",
+              "path": ["api", "users", "register"]
+            }
+          }
+        },
+        {
+          "name": "Kullanıcı Kaydı - Designer",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Rastgele designer adı oluştur",
+                  "const designerNames = ['luna', 'nova', 'zen', 'pixel', 'art', 'design', 'creative', 'visual'];",
+                  "const randomDesignerName = designerNames[Math.floor(Math.random() * designerNames.length)];",
+                  "const timestamp = Date.now();",
+                  "const randomSuffix = Math.floor(Math.random() * 1000);",
+                  "const uniqueSuffix = timestamp.toString().slice(-6) + randomSuffix;",
+                  "pm.environment.set('designerName', randomDesignerName + uniqueSuffix);",
+                  "",
+                  "// Rastgele designer email oluştur",
+                  "const designerEmails = ['luna', 'nova', 'zen', 'pixel', 'art', 'design', 'creative', 'visual'];",
+                  "const randomDesignerEmail = designerEmails[Math.floor(Math.random() * designerEmails.length)];",
+                  "pm.environment.set('designerEmail', randomDesignerEmail + uniqueSuffix + '@example.com');",
+                  "",
+                  "// Rastgele designer şifre oluştur",
+                  "const designerPasswords = ['Design123!', 'Art456!', 'Creative789!', 'Visual123!', 'DesignPass456!', 'ArtPass789!', 'CreativePass123!', 'VisualPass456!'];",
+                  "const randomDesignerPassword = designerPasswords[Math.floor(Math.random() * designerPasswords.length)];",
+                  "pm.environment.set('designerPassword', randomDesignerPassword);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Designer user created successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('designerUserId', jsonData.id);",
+                  "    console.log('Designer User ID saved:', jsonData.id);",
+                  "});",
+                  "",
+                  "// 409 Conflict durumunda mevcut kullanıcıyı al",
+                  "if (pm.response.code === 409) {",
+                  "    console.log('Designer user already exists, getting existing user...');",
+                  "    pm.sendRequest({",
+                  "        url: pm.environment.get('baseUrl') + ':' + pm.environment.get('userServicePort') + '/api/users',",
+                  "        method: 'GET'",
+                  "    }, function (err, response) {",
+                  "        if (response && response.json()) {",
+                  "            var users = response.json();",
+                  "            var designerUser = users.find(u => u.name.includes('luna') || u.name.includes('nova') || u.name.includes('zen') || u.name.includes('pixel'));",
+                  "            if (designerUser) {",
+                  "                pm.environment.set('designerUserId', designerUser.id);",
+                  "                console.log('Existing Designer User ID saved:', designerUser.id);",
+                  "            }",
+                  "        }",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{designerName}}\",\n  \"email\": \"{{designerEmail}}\",\n  \"password\": \"{{designerPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}:{{userServicePort}}/api/users/register",
+              "host": ["{{baseUrl}}"],
+              "port": "{{userServicePort}}",
+              "path": ["api", "users", "register"]
+            }
+          }
+        },
+        {
+          "name": "Kullanıcı Kaydı - Tester",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Rastgele tester adı oluştur",
+                  "const testerNames = ['test', 'qa', 'quality', 'bug', 'tester', 'check', 'verify', 'validate'];",
+                  "const randomTesterName = testerNames[Math.floor(Math.random() * testerNames.length)];",
+                  "const timestamp = Date.now();",
+                  "const randomSuffix = Math.floor(Math.random() * 1000);",
+                  "const uniqueSuffix = timestamp.toString().slice(-6) + randomSuffix;",
+                  "pm.environment.set('testerName', randomTesterName + uniqueSuffix);",
+                  "",
+                  "// Rastgele tester email oluştur",
+                  "const testerEmails = ['test', 'qa', 'quality', 'bug', 'tester', 'check', 'verify', 'validate'];",
+                  "const randomTesterEmail = testerEmails[Math.floor(Math.random() * testerEmails.length)];",
+                  "pm.environment.set('testerEmail', randomTesterEmail + uniqueSuffix + '@example.com');",
+                  "",
+                  "// Rastgele tester şifre oluştur",
+                  "const testerPasswords = ['Test123!', 'QA456!', 'Quality789!', 'Bug123!', 'TestPass456!', 'QAPass789!', 'QualityPass123!', 'BugPass456!'];",
+                  "const randomTesterPassword = testerPasswords[Math.floor(Math.random() * testerPasswords.length)];",
+                  "pm.environment.set('testerPassword', randomTesterPassword);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Tester user created successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('testerUserId', jsonData.id);",
+                  "    console.log('Tester User ID saved:', jsonData.id);",
+                  "});",
+                  "",
+                  "// 409 Conflict durumunda mevcut kullanıcıyı al",
+                  "if (pm.response.code === 409) {",
+                  "    console.log('Tester user already exists, getting existing user...');",
+                  "    pm.sendRequest({",
+                  "        url: pm.environment.get('baseUrl') + ':' + pm.environment.get('userServicePort') + '/api/users',",
+                  "        method: 'GET'",
+                  "    }, function (err, response) {",
+                  "        if (response && response.json()) {",
+                  "            var users = response.json();",
+                  "            var testerUser = users.find(u => u.name.includes('test') || u.name.includes('qa') || u.name.includes('quality') || u.name.includes('bug'));",
+                  "            if (testerUser) {",
+                  "                pm.environment.set('testerUserId', testerUser.id);",
+                  "                console.log('Existing Tester User ID saved:', testerUser.id);",
+                  "            }",
+                  "        }",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{testerName}}\",\n  \"email\": \"{{testerEmail}}\",\n  \"password\": \"{{testerPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}:{{userServicePort}}/api/users/register",
+              "host": ["{{baseUrl}}"],
+              "port": "{{userServicePort}}",
+              "path": ["api", "users", "register"]
+            }
+          }
+        },
+        {
+          "name": "Tüm Kullanıcıları Getir",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}:{{userServicePort}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "port": "{{userServicePort}}",
+              "path": ["api", "users"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Workspace İşlemleri",
+      "item": [
+        {
+          "name": "Workspace Oluştur - Ana Proje",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Rastgele workspace adı oluştur",
+                  "const workspaceNames = ['Ana Proje', 'Main Project', 'Core System', 'Primary App', 'Master Project', 'Central Hub', 'Main App', 'Core Platform'];",
+                  "const randomWorkspaceName = workspaceNames[Math.floor(Math.random() * workspaceNames.length)];",
+                  "const timestamp = Date.now();",
+                  "const randomSuffix = Math.floor(Math.random() * 1000);",
+                  "const uniqueSuffix = timestamp.toString().slice(-6) + randomSuffix;",
+                  "pm.environment.set('workspaceName', randomWorkspaceName + uniqueSuffix);",
+                  "",
+                  "// Rastgele workspace açıklaması oluştur",
+                  "const workspaceDescriptions = ['Ana proje workspace', 'Main project workspace', 'Core system workspace', 'Primary application workspace', 'Master project workspace', 'Central hub workspace', 'Main application workspace', 'Core platform workspace'];",
+                  "const randomWorkspaceDescription = workspaceDescriptions[Math.floor(Math.random() * workspaceDescriptions.length)];",
+                  "pm.environment.set('workspaceDescription', randomWorkspaceDescription + ' - ' + uniqueSuffix);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Workspace created successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('workspaceId', jsonData.id);",
+                  "    console.log('Workspace ID saved:', jsonData.id);",
+                  "});",
+                  "",
+                  "// 400 Bad Request durumunda adminUserId kontrolü",
+                  "if (pm.response.code === 400) {",
+                  "    console.log('Workspace creation failed, checking adminUserId...');",
+                  "    var adminUserId = pm.environment.get('adminUserId');",
+                  "    if (!adminUserId || adminUserId === '') {",
+                  "        console.log('adminUserId is empty, trying to get from users...');",
+                  "        pm.sendRequest({",
+                  "            url: pm.environment.get('baseUrl') + ':' + pm.environment.get('userServicePort') + '/api/users',",
+                  "            method: 'GET'",
+                  "        }, function (err, response) {",
+                  "            if (response && response.json()) {",
+                  "                var users = response.json();",
+                  "                var adminUser = users.find(u => u.name.includes('admin') || u.name.includes('administrator') || u.name.includes('superuser'));",
+                  "                if (adminUser) {",
+                  "                    pm.environment.set('adminUserId', adminUser.id);",
+                  "                    console.log('Admin User ID found and saved:', adminUser.id);",
+                  "                }",
+                  "            }",
+                  "        });",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{workspaceName}}\",\n  \"description\": \"{{workspaceDescription}}\",\n  \"createdById\": \"{{adminUserId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}:{{chatServicePort}}/api/conversations/workspaces",
+              "host": ["{{baseUrl}}"],
+              "port": "{{chatServicePort}}",
+              "path": ["api", "conversations", "workspaces"]
+            }
+          }
+        },
+        {
+          "name": "Workspace Oluştur - Test Projesi",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Rastgele test workspace adı oluştur",
+                  "const testNames = ['Test', 'QA', 'Quality', 'Beta', 'Staging', 'Sandbox', 'Lab', 'Demo'];",
+                  "const testTypes = ['Projesi', 'Environment', 'Workspace', 'Lab', 'Center', 'Hub'];",
+                  "const randomTestName = testNames[Math.floor(Math.random() * testNames.length)];",
+                  "const randomTestType = testTypes[Math.floor(Math.random() * testTypes.length)];",
+                  "const timestamp = Date.now();",
+                  "const randomSuffix = Math.floor(Math.random() * 1000);",
+                  "const uniqueSuffix = timestamp.toString().slice(-6) + randomSuffix;",
+                  "pm.environment.set('testWorkspaceName', randomTestName + ' ' + randomTestType + uniqueSuffix);",
+                  "",
+                  "// Rastgele test workspace açıklaması oluştur",
+                  "const testDescriptions = ['Test projesi workspace', 'QA environment workspace', 'Quality testing workspace', 'Beta testing workspace', 'Staging environment workspace', 'Sandbox testing workspace', 'Lab testing workspace', 'Demo project workspace'];",
+                  "const randomTestDescription = testDescriptions[Math.floor(Math.random() * testDescriptions.length)];",
+                  "pm.environment.set('testWorkspaceDescription', randomTestDescription + ' - ' + uniqueSuffix);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Test Workspace created successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('testWorkspaceId', jsonData.id);",
+                  "    console.log('Test Workspace ID saved:', jsonData.id);",
+                  "});",
+                  "",
+                  "// 400 Bad Request durumunda testerUserId kontrolü",
+                  "if (pm.response.code === 400) {",
+                  "    console.log('Test Workspace creation failed, checking testerUserId...');",
+                  "    var testerUserId = pm.environment.get('testerUserId');",
+                  "    if (!testerUserId || testerUserId === '') {",
+                  "        console.log('testerUserId is empty, trying to get from users...');",
+                  "        pm.sendRequest({",
+                  "            url: pm.environment.get('baseUrl') + ':' + pm.environment.get('userServicePort') + '/api/users',",
+                  "            method: 'GET'",
+                  "        }, function (err, response) {",
+                  "            if (response && response.json()) {",
+                  "                var users = response.json();",
+                  "                var testerUser = users.find(u => u.name.includes('test') || u.name.includes('qa') || u.name.includes('quality') || u.name.includes('bug'));",
+                  "                if (testerUser) {",
+                  "                    pm.environment.set('testerUserId', testerUser.id);",
+                  "                    console.log('Tester User ID found and saved:', testerUser.id);",
+                  "                }",
+                  "            }",
+                  "        });",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{testWorkspaceName}}\",\n  \"description\": \"{{testWorkspaceDescription}}\",\n  \"createdById\": \"{{testerUserId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}:{{chatServicePort}}/api/conversations/workspaces",
+              "host": ["{{baseUrl}}"],
+              "port": "{{chatServicePort}}",
+              "path": ["api", "conversations", "workspaces"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost"
+    },
+    {
+      "key": "userServicePort",
+      "value": "5001"
+    },
+    {
+      "key": "chatServicePort",
+      "value": "5002"
+    },
+    {
+      "key": "taskServicePort",
+      "value": "5003"
+    },
+    {
+      "key": "authServicePort",
+      "value": "5000"
+    }
+  ]
+}
+

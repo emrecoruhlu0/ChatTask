@@ -42,9 +42,6 @@ namespace ChatTask.ChatService.Migrations
                     b.Property<bool>("IsArchived")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsPrivate")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -78,9 +75,6 @@ namespace ChatTask.ChatService.Migrations
                     b.Property<int>("ParentType")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("ConversationId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -91,8 +85,6 @@ namespace ChatTask.ChatService.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("UserId", "ParentId", "ParentType");
-
-                    b.HasIndex("ConversationId");
 
                     b.HasIndex("ParentId");
 
@@ -243,9 +235,6 @@ namespace ChatTask.ChatService.Migrations
 
             modelBuilder.Entity("ChatTask.ChatService.Models.Member", b =>
                 {
-                    b.HasOne("ChatTask.ChatService.Models.Conversation", null)
-                        .WithMany("Members")
-                        .HasForeignKey("ConversationId");
                 });
 
             modelBuilder.Entity("ChatTask.ChatService.Models.Message", b =>

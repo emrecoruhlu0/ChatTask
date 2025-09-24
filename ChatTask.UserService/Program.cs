@@ -22,9 +22,10 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:8080", "http://localhost:3000", "http://localhost:5173")
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
@@ -41,5 +42,20 @@ app.UseStaticFiles();
 app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
+
+// Database'i oluştur
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+    try
+    {
+        context.Database.EnsureCreated();
+        Console.WriteLine("[UserService] Database created successfully");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[UserService] Database creation error: {ex.Message}");
+    }
+}
 
 app.Run();

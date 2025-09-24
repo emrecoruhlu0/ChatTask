@@ -364,6 +364,26 @@ public class UsersController : ControllerBase
         }
     }
 
+    [HttpGet("{id:guid}/workspaces")]
+    public async Task<IActionResult> GetUserWorkspaces(Guid id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Geçici olarak dummy workspace döndür
+            // Gerçek implementasyonda kullanıcının workspace'lerini database'den al
+            var dummyWorkspaces = new[]
+            {
+                new { id = "d34fa2d4-5438-4f76-9ca3-ce095c2599a5", name = "Default Workspace" }
+            };
+
+            return Ok(dummyWorkspaces);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = "Kullanıcı workspace'leri alınırken hata oluştu", Error = ex.Message });
+        }
+    }
+
     [HttpPut("{id:guid}/status")]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] string status, CancellationToken cancellationToken)
     {

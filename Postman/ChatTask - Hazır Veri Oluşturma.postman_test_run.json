@@ -1,0 +1,789 @@
+{
+	"id": "0e190602-7126-47b0-af29-366186a5a7fd",
+	"name": "ChatTask - Hazır Veri Oluşturma",
+	"timestamp": "2025-09-23T10:21:47.711Z",
+	"collection_id": "47034976-4e5df8e0-f943-4b26-8eb6-58d33ce0bc8b",
+	"folder_id": 0,
+	"environment_id": "47034976-81fa72f5-baa7-418e-8eb9-413beb939621",
+	"totalPass": 0,
+	"delay": 0,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2025-09-23T10:21:44.221Z",
+	"totalFail": 7,
+	"results": [
+		{
+			"id": "adbb92ce-959b-42d0-b636-f8be520da42e",
+			"name": "Kullanıcı Kaydı - Admin",
+			"url": "http://localhost:5001/api/users/register",
+			"time": 11,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Admin user created successfully": false
+			},
+			"testPassFailCounts": {
+				"Admin user created successfully": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				11
+			],
+			"allTests": [
+				{
+					"Admin user created successfully": false
+				}
+			]
+		},
+		{
+			"id": "e8e25f08-8ee5-45ad-b98e-a3d3a15d6318",
+			"name": "Kullanıcı Kaydı - Developer 1",
+			"url": "http://localhost:5001/api/users/register",
+			"time": 6,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Developer 1 user created successfully": false
+			},
+			"testPassFailCounts": {
+				"Developer 1 user created successfully": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				6
+			],
+			"allTests": [
+				{
+					"Developer 1 user created successfully": false
+				}
+			]
+		},
+		{
+			"id": "fe50b313-0609-434c-b04d-a8255b817b8c",
+			"name": "Kullanıcı Kaydı - Developer 2",
+			"url": "http://localhost:5001/api/users/register",
+			"time": 6,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Developer 2 user created successfully": false
+			},
+			"testPassFailCounts": {
+				"Developer 2 user created successfully": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				6
+			],
+			"allTests": [
+				{
+					"Developer 2 user created successfully": false
+				}
+			]
+		},
+		{
+			"id": "ae68284e-5872-4da9-b91d-ddbeed2b4236",
+			"name": "Kullanıcı Kaydı - Designer",
+			"url": "http://localhost:5001/api/users/register",
+			"time": 4,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Designer user created successfully": false
+			},
+			"testPassFailCounts": {
+				"Designer user created successfully": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				4
+			],
+			"allTests": [
+				{
+					"Designer user created successfully": false
+				}
+			]
+		},
+		{
+			"id": "a84a28bd-a160-4c0d-a67a-a585437a958d",
+			"name": "Kullanıcı Kaydı - Tester",
+			"url": "http://localhost:5001/api/users/register",
+			"time": 4,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Tester user created successfully": false
+			},
+			"testPassFailCounts": {
+				"Tester user created successfully": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				4
+			],
+			"allTests": [
+				{
+					"Tester user created successfully": false
+				}
+			]
+		},
+		{
+			"id": "63336667-4ca0-4da9-8ce2-255c7b677cd5",
+			"name": "Tüm Kullanıcıları Getir",
+			"url": "http://localhost:5001/api/users",
+			"time": 99,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				99
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "a8e1cc76-af12-45d7-8934-51033fdeccc5",
+			"name": "Workspace Oluştur - Ana Proje",
+			"url": "http://localhost:5002/api/conversations/workspaces",
+			"time": 8,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Workspace created successfully": false
+			},
+			"testPassFailCounts": {
+				"Workspace created successfully": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				8
+			],
+			"allTests": [
+				{
+					"Workspace created successfully": false
+				}
+			]
+		},
+		{
+			"id": "d6a48c75-d5f5-4364-af9b-d10f56dfb89a",
+			"name": "Workspace Oluştur - Test Projesi",
+			"url": "http://localhost:5002/api/conversations/workspaces",
+			"time": 5,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				5
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "82fffb9f-25fa-4ffd-8411-9e908152d3ac",
+			"name": "Workspace Üyelerini Getir",
+			"url": "http://localhost:5002/api/conversations/workspaces//members",
+			"time": 3,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				3
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "ea797e18-964c-43ba-9385-26f29be0eb9a",
+			"name": "Channel Oluştur - Genel",
+			"url": "http://localhost:5002/api/conversations/workspaces//channels",
+			"time": 3,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Genel Channel created successfully": false
+			},
+			"testPassFailCounts": {
+				"Genel Channel created successfully": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				3
+			],
+			"allTests": [
+				{
+					"Genel Channel created successfully": false
+				}
+			]
+		},
+		{
+			"id": "408fce54-ecd0-4873-accc-f7dd06773ddc",
+			"name": "Channel Oluştur - Geliştirme",
+			"url": "http://localhost:5002/api/conversations/workspaces//channels",
+			"time": 4,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				4
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "c7895a1f-f522-4701-abe6-dcd677f6650d",
+			"name": "Channel Oluştur - Tasarım",
+			"url": "http://localhost:5002/api/conversations/workspaces//channels",
+			"time": 4,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				4
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "bc37cafc-f9a3-4325-9904-dffbc0f1f8c2",
+			"name": "Channel Oluştur - Test",
+			"url": "http://localhost:5002/api/conversations/workspaces//channels",
+			"time": 4,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				4
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "54b8e700-4c91-4ac4-bc53-d7b1b10d9f6f",
+			"name": "Group Oluştur - Sprint 1",
+			"url": "http://localhost:5002/api/conversations/workspaces//groups",
+			"time": 3,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				3
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "b23e1a15-4c13-4035-9eb5-bae44a82617f",
+			"name": "Group Oluştur - Bug Fix",
+			"url": "http://localhost:5002/api/conversations/workspaces//groups",
+			"time": 3,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				3
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "4bd483ab-c568-4231-85f7-8a200e56867e",
+			"name": "Direct Message Oluştur - Admin-Dev1",
+			"url": "http://localhost:5002/api/conversations/workspaces//direct-messages",
+			"time": 4,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				4
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "af993052-35e0-43a0-88ac-3954a956fd72",
+			"name": "Direct Message Oluştur - Dev1-Dev2",
+			"url": "http://localhost:5002/api/conversations/workspaces//direct-messages",
+			"time": 3,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				3
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "6603cc1e-491e-47c3-bc23-e5ea5049f0da",
+			"name": "Task Oluştur - Backend API",
+			"url": "http://localhost:5003/api/tasks",
+			"time": 7,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				7
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "a590898c-1cab-4ee0-9981-d2396b21b44a",
+			"name": "Task Oluştur - Frontend UI",
+			"url": "http://localhost:5003/api/tasks",
+			"time": 3,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				3
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "0fb11289-aa46-411b-baf2-48fdeba61c42",
+			"name": "Task Oluştur - Test Senaryoları",
+			"url": "http://localhost:5003/api/tasks",
+			"time": 3,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				3
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "b0229a19-448b-4a71-a5b1-a10da60b8cce",
+			"name": "Task Oluştur - Database Optimizasyonu",
+			"url": "http://localhost:5003/api/tasks",
+			"time": 4,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				4
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "c01fb507-c0f5-4ac2-9517-d38a59c29aee",
+			"name": "Tüm Task'ları Getir",
+			"url": "http://localhost:5003/api/tasks",
+			"time": 3,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				3
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "5593db02-f7e5-474e-aefe-595ef69ea372",
+			"name": "Mesaj Gönder - Genel Kanal",
+			"url": "http://localhost:5002/api/conversations//messages",
+			"time": 3,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				3
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "3660a8ef-7945-4321-ab3a-fb73de4c9bec",
+			"name": "Mesaj Gönder - Geliştirme Kanalı",
+			"url": "http://localhost:5002/api/conversations//messages",
+			"time": 3,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				3
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "9d9680f8-cbe5-4c00-9516-44644f0f657a",
+			"name": "Mesaj Gönder - Tasarım Kanalı",
+			"url": "http://localhost:5002/api/conversations//messages",
+			"time": 3,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				3
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "2cc3accd-5857-4ad1-9709-a3ef26925cd1",
+			"name": "Mesaj Gönder - Test Kanalı",
+			"url": "http://localhost:5002/api/conversations//messages",
+			"time": 4,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				4
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "eba0bb4a-b157-480b-be1b-f73b0525ba67",
+			"name": "Workspace'leri Getir",
+			"url": "http://localhost:5002/api/conversations/workspaces?userId=",
+			"time": 5,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				5
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "12d8e563-6979-4d2f-83c6-fccd99d33c52",
+			"name": "Conversation'ları Getir",
+			"url": "http://localhost:5002/api/conversations/workspaces/?userId=",
+			"time": 4,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				4
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "de800366-7bbe-4619-a313-d32c5e7ef440",
+			"name": "Channel'ları Getir",
+			"url": "http://localhost:5002/api/conversations/workspaces/?userId=&type=channel",
+			"time": 5,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				5
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "b12f686a-e72d-416d-8717-de61bbabf4a8",
+			"name": "Group'ları Getir",
+			"url": "http://localhost:5002/api/conversations/workspaces/?userId=&type=group",
+			"time": 4,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				4
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "c420c626-7070-4bc9-93b8-1d8dbc88c474",
+			"name": "Direct Message'ları Getir",
+			"url": "http://localhost:5002/api/conversations/workspaces/?userId=&type=dm",
+			"time": 4,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				4
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "b36ecb0b-f1b9-4369-aa46-509a08bdd06f",
+			"name": "TaskGroup'ları Getir",
+			"url": "http://localhost:5002/api/conversations/workspaces/?userId=&type=taskgroup",
+			"time": 3,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				3
+			],
+			"allTests": [
+				{}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 232,
+	"collection": {
+		"requests": [
+			{
+				"id": "adbb92ce-959b-42d0-b636-f8be520da42e",
+				"method": "POST"
+			},
+			{
+				"id": "e8e25f08-8ee5-45ad-b98e-a3d3a15d6318",
+				"method": "POST"
+			},
+			{
+				"id": "fe50b313-0609-434c-b04d-a8255b817b8c",
+				"method": "POST"
+			},
+			{
+				"id": "ae68284e-5872-4da9-b91d-ddbeed2b4236",
+				"method": "POST"
+			},
+			{
+				"id": "a84a28bd-a160-4c0d-a67a-a585437a958d",
+				"method": "POST"
+			},
+			{
+				"id": "63336667-4ca0-4da9-8ce2-255c7b677cd5",
+				"method": "GET"
+			},
+			{
+				"id": "a8e1cc76-af12-45d7-8934-51033fdeccc5",
+				"method": "POST"
+			},
+			{
+				"id": "d6a48c75-d5f5-4364-af9b-d10f56dfb89a",
+				"method": "POST"
+			},
+			{
+				"id": "82fffb9f-25fa-4ffd-8411-9e908152d3ac",
+				"method": "GET"
+			},
+			{
+				"id": "ea797e18-964c-43ba-9385-26f29be0eb9a",
+				"method": "POST"
+			},
+			{
+				"id": "408fce54-ecd0-4873-accc-f7dd06773ddc",
+				"method": "POST"
+			},
+			{
+				"id": "c7895a1f-f522-4701-abe6-dcd677f6650d",
+				"method": "POST"
+			},
+			{
+				"id": "bc37cafc-f9a3-4325-9904-dffbc0f1f8c2",
+				"method": "POST"
+			},
+			{
+				"id": "54b8e700-4c91-4ac4-bc53-d7b1b10d9f6f",
+				"method": "POST"
+			},
+			{
+				"id": "b23e1a15-4c13-4035-9eb5-bae44a82617f",
+				"method": "POST"
+			},
+			{
+				"id": "4bd483ab-c568-4231-85f7-8a200e56867e",
+				"method": "POST"
+			},
+			{
+				"id": "af993052-35e0-43a0-88ac-3954a956fd72",
+				"method": "POST"
+			},
+			{
+				"id": "6603cc1e-491e-47c3-bc23-e5ea5049f0da",
+				"method": "POST"
+			},
+			{
+				"id": "a590898c-1cab-4ee0-9981-d2396b21b44a",
+				"method": "POST"
+			},
+			{
+				"id": "0fb11289-aa46-411b-baf2-48fdeba61c42",
+				"method": "POST"
+			},
+			{
+				"id": "b0229a19-448b-4a71-a5b1-a10da60b8cce",
+				"method": "POST"
+			},
+			{
+				"id": "c01fb507-c0f5-4ac2-9517-d38a59c29aee",
+				"method": "GET"
+			},
+			{
+				"id": "5593db02-f7e5-474e-aefe-595ef69ea372",
+				"method": "POST"
+			},
+			{
+				"id": "3660a8ef-7945-4321-ab3a-fb73de4c9bec",
+				"method": "POST"
+			},
+			{
+				"id": "9d9680f8-cbe5-4c00-9516-44644f0f657a",
+				"method": "POST"
+			},
+			{
+				"id": "2cc3accd-5857-4ad1-9709-a3ef26925cd1",
+				"method": "POST"
+			},
+			{
+				"id": "eba0bb4a-b157-480b-be1b-f73b0525ba67",
+				"method": "GET"
+			},
+			{
+				"id": "12d8e563-6979-4d2f-83c6-fccd99d33c52",
+				"method": "GET"
+			},
+			{
+				"id": "de800366-7bbe-4619-a313-d32c5e7ef440",
+				"method": "GET"
+			},
+			{
+				"id": "b12f686a-e72d-416d-8717-de61bbabf4a8",
+				"method": "GET"
+			},
+			{
+				"id": "c420c626-7070-4bc9-93b8-1d8dbc88c474",
+				"method": "GET"
+			},
+			{
+				"id": "b36ecb0b-f1b9-4369-aa46-509a08bdd06f",
+				"method": "GET"
+			}
+		]
+	}
+}

@@ -2,13 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '../ui/button';
 import { useAppStore } from '../../store/useAppStore';
 import { chatApiService } from '../../services/chat';
+import { signalRService } from '../../services/signalr';
+import { ConversationInfoDialog } from '../conversation/ConversationInfoDialog';
 import { 
   Send, 
   Hash, 
   User, 
   Loader2, 
   MessageSquare,
-  Check
+  Check,
+  ArrowLeft,
+  Info
 } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import toast from 'react-hot-toast';
@@ -22,19 +26,30 @@ export const ChatArea: React.FC = () => {
     setMessages,
     addMessage,
     setLoadingMessages,
-    updateMessage
+    updateMessage,
+    setCurrentConversation
   } = useAppStore();
 
   const [newMessage, setNewMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [isConversationInfoOpen, setIsConversationInfoOpen] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Load messages when conversation changes
+  // Load messages and join SignalR group when conversation changes
   useEffect(() => {
     if (currentConversation) {
       loadMessages();
+      // Join SignalR group for real-time messages
+      signalRService.joinConversation(currentConversation.id);
     }
+    
+    // Cleanup: leave previous conversation group
+    return () => {
+      if (currentConversation) {
+        signalRService.leaveConversation(currentConversation.id);
+      }
+    };
   }, [currentConversation]);
 
   // Auto-scroll to bottom when messages change
@@ -140,6 +155,13 @@ export const ChatArea: React.FC = () => {
       <div className="border-b border-border p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setCurrentConversation(null)}
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
             {currentConversation.type === 'Channel' ? (
               <Hash className="h-5 w-5 text-muted-foreground" />
             ) : (
@@ -155,8 +177,12 @@ export const ChatArea: React.FC = () => {
             )}
           </div>
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="sm">
-              <User className="h-4 w-4" />
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setIsConversationInfoOpen(true)}
+            >
+              <Info className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -259,6 +285,12 @@ export const ChatArea: React.FC = () => {
           </Button>
         </div>
       </div>
+      
+      <ConversationInfoDialog
+        isOpen={isConversationInfoOpen}
+        onClose={() => setIsConversationInfoOpen(false)}
+        conversation={currentConversation}
+      />
     </div>
   );
 };

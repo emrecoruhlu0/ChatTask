@@ -83,6 +83,28 @@ class SignalRService {
     });
   }
 
+  async joinConversation(conversationId: string): Promise<void> {
+    if (this.connection?.state === signalR.HubConnectionState.Connected) {
+      try {
+        await this.connection.invoke('JoinGroup', conversationId);
+        console.log(`🔗 SignalR: Joined conversation ${conversationId}`);
+      } catch (error) {
+        console.error('❌ SignalR: Failed to join conversation', error);
+      }
+    }
+  }
+
+  async leaveConversation(conversationId: string): Promise<void> {
+    if (this.connection?.state === signalR.HubConnectionState.Connected) {
+      try {
+        await this.connection.invoke('LeaveGroup', conversationId);
+        console.log(`🔗 SignalR: Left conversation ${conversationId}`);
+      } catch (error) {
+        console.error('❌ SignalR: Failed to leave conversation', error);
+      }
+    }
+  }
+
   async disconnect(): Promise<void> {
     if (this.connection) {
       await this.connection.stop();

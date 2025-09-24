@@ -1,0 +1,98 @@
+{
+  "id": "chat-task-local-env",
+  "name": "ChatTask Local",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "userServicePort",
+      "value": "5001",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "chatServicePort",
+      "value": "5002",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "taskServicePort",
+      "value": "5003",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "authServicePort",
+      "value": "5000",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "adminUserId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "dev1UserId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "dev2UserId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "designerUserId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "testerUserId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "workspaceId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "genelChannelId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "gelistirmeChannelId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "tasarimChannelId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "testChannelId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}
+
